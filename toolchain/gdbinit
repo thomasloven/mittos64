@@ -1,0 +1,16 @@
+set prompt \033[31m(gdb) \033[0m
+set disassembly-flavor intel
+
+target remote :1234
+
+define q
+monitor quit
+end
+
+define reg
+monitor info registers
+end
+
+define reset
+monitor system_reset
+end

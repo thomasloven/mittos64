@@ -9,8 +9,4 @@ if [ -z ${MITTOS64+x} ]; then
   exit 1
 fi
 
-iso=/opt/mittos64.iso
-
-/opt/toolchain/mkiso
-
-qemu-system-x86_64 -s -S -cdrom ${iso} -curses
+gdb -q -x /opt/toolchain/gdbinit
