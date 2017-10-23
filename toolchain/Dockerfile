@@ -5,4 +5,5 @@ RUN apk --update add make binutils gcc && \
     rm -rf /var/cache/apk/*
 
 ENV PATH "/opt/toolchain:$PATH"
+ENV MITTOS64 "true"
 WORKDIR /opt
