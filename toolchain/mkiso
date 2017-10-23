@@ -9,8 +9,9 @@ if [ -z ${MITTOS64+x} ]; then
   exit 1
 fi
 
+sysroot=/opt/sysroot
 iso=/opt/mittos64.iso
 
-/opt/toolchain/mkiso
+mkdir -p ${sysroot}
 
-qemu-system-x86_64 -cdrom ${iso} -curses
+grub-mkrescue -o ${iso} ${sysroot}
