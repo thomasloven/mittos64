@@ -1,12 +1,5 @@
 #!/bin/sh -e
 
-if [ -z ${MITTOS64+x} ]; then
-  echo -en "\033[31mWarning: \033[0m"
-  echo "It seems you are trying to build mittos64 in an unsuported environment."
-  echo "This makefile is designed to run inside a mittos64-specific docker container."
-  echo "If you know what you're doing, define the environment variable "MITTOS64""
-  echo "See README.md for more information"
-  exit 1
-fi
+if [ -z ${MITTOS64+x} ]; then >&2 echo "Unsupported environment! See README"; exit 1; fi
 
 gdb -q -x /opt/toolchain/gdbinit
