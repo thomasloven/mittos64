@@ -1,0 +1,18 @@
+#!/bin/sh -e
+
+if [ -z ${MITTOS64+x} ]; then
+  echo -en "\033[31mWarning: \033[0m"
+  echo "It seems you are trying to build mittos64 in an unsuported environment."
+  echo "This makefile is designed to run inside a mittos64-specific docker container."
+  echo "If you know what you're doing, define the environment variable "MITTOS64""
+  echo "See README.md for more information"
+  exit 1
+fi
+
+sysroot=/opt/sysroot
+iso=/opt/mittos64.iso
+
+mkdir -p ${sysroot}
+
+grub-mkrescue -o ${iso} ${sysroot}
+qemu-system-x86_64 -cdrom ${iso} -curses
