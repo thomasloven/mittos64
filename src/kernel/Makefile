@@ -9,6 +9,7 @@ OBJ := $(patsubst %, %.o, $(basename $(SRC)))
 
 CFLAGS ?= -Wall -Wextra
 CFLAGS += -ffreestanding
+CPPFLAGS += -I include
 
 all: kernel
 
