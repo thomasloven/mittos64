@@ -7,4 +7,15 @@ iso=${BUILDROOT}mittos64.iso
 
 mkdir -p ${sysroot}
 
+mkdir -p ${sysroot}/boot/grub
+cat > ${sysroot}/boot/grub/grub.cfg << EOF
+set timeout=1
+set default=0
+
+menuentry "mittos64" {
+  multiboot /kernel
+}
+
+EOF
+
 grub-mkrescue -o ${iso} ${sysroot}
