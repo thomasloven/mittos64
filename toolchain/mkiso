@@ -13,6 +13,9 @@ set timeout=1
 set default=0
 
 menuentry "mittos64" {
+  multiboot2 /kernel
+}
+menuentry "mittos64 multiboot1" {
   multiboot /kernel
 }
 
