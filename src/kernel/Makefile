@@ -15,5 +15,16 @@ all: kernel
 kernel: LDFLAGS += -n -nostdlib -T Link.ld
 kernel: $(OBJ)
 	$(LINK.c) $^ -o $@
+
+
+# Copy kernel to sysroot
+/opt/sysroot/kernel: kernel
 	mkdir -p /opt/sysroot
 	cp kernel /opt/sysroot/kernel
+
+install: /opt/sysroot/kernel
+
+clean:
+	rm -rf $(OBJ) kernel
+
+.PHONY: install
