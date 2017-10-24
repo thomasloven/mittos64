@@ -3,4 +3,5 @@
 **Table of Contents**
 
 [Chapter 0: Introduction](0_Introduction.md)<br>
+[Chapter 1: Toolchain](1_Toolchain.md)<br>
 
