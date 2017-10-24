@@ -26,6 +26,9 @@ MultiBootHeader2End:
 _start:
 cli
 
+# Save the multiboot magic number
+mov ecx, eax
+
 // Print a red exclamation mark in top left corner
 mov eax, 0x0421
 mov short [0xB8000], ax
