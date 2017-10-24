@@ -1,1 +1,4 @@
 sysroot/
+*.o
+*.d
+src/kernel/kernel
