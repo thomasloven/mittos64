@@ -1,6 +1,7 @@
 set prompt \033[31m(gdb) \033[0m
 set disassembly-flavor intel
 
+file /opt/sysroot/kernel
 target remote :1234
 
 define q

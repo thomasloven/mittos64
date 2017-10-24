@@ -9,7 +9,8 @@ OBJ := $(patsubst %, %.o, $(basename $(SRC)))
 DEP := $(OBJ:.o=.d)
 
 CFLAGS ?= -Wall -Wextra
-CFLAGS += -ffreestanding
+CFLAGS += -ffreestanding -ggdb -O0
+ASFLAGS += -ggdb
 CPPFLAGS += -I include
 
 all: kernel
