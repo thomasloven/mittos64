@@ -2,4 +2,4 @@
 
 if [ -z ${MITTOS64+x} ]; then >&2 echo "Unsupported environment! See README"; exit 1; fi
 
-gdb -q -x /opt/toolchain/gdbinit
+/usr/bin/gdb -q -x /opt/toolchain/gdbinit
