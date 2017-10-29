@@ -1,7 +1,11 @@
 set prompt \033[31m(gdb) \033[0m
 set disassembly-flavor intel
 
-file /opt/sysroot/kernel
+python
+import os
+gdb.execute('file ' + os.environ['BUILDROOT'] + 'sysroot/kernel')
+end
+
 target remote :1234
 
 define q

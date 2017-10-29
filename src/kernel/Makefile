@@ -28,11 +28,11 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 
 
 # Copy kernel to sysroot
-/opt/sysroot/kernel: kernel
-	mkdir -p /opt/sysroot
-	cp kernel /opt/sysroot/kernel
+$(BUILDROOT)sysroot/kernel: kernel
+	mkdir -p $(BUILDROOT)sysroot
+	cp kernel $(BUILDROOT)sysroot/kernel
 
-install: /opt/sysroot/kernel
+install: $(BUILDROOT)sysroot/kernel
 
 clean:
 	rm -rf $(OBJ) $(DEP) kernel
