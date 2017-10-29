@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# This script serves the documentation folder rendered to HTML using GitHub Markdown on port 5000
+
+# docker run -d --rm -v $(pwd)/doc:/data -p 5000:6419 kbai/grip 0.0.0.0:6419
+docker run -d --rm -v $(pwd)/doc:/data -p 5000:3080 thomsch98/markserv
