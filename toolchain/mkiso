@@ -2,8 +2,8 @@
 
 if [ -z ${MITTOS64+x} ]; then >&2 echo "Unsupported environment! See README"; exit 1; fi
 
-sysroot=/opt/sysroot
-iso=/opt/mittos64.iso
+sysroot=${BUILDROOT}sysroot
+iso=${BUILDROOT}mittos64.iso
 
 mkdir -p ${sysroot}
 
