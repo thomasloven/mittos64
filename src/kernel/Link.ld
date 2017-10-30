@@ -2,10 +2,9 @@ ENTRY(_start)
 
 SECTIONS
 {
-  .text : AT(ADDR(.text))
+  .text :
   {
     *(.multiboot)
     *(.text)
-    . = ALIGN(4096);
   }
 }
