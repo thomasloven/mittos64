@@ -6,24 +6,20 @@ CC := x86_64-elf-gcc
 
 SRC := $(wildcard **/*.[cS])
 OBJ := $(patsubst %, %.o, $(basename $(SRC)))
-DEP := $(OBJ:.o=.d)
 
-CFLAGS ?= -Wall -Wextra
-CFLAGS += -ffreestanding -ggdb -O0
+CFLAGS := -Wall -Wextra -pedantic -ffreestanding
+CFLAGS += -ggdb -O0
 ASFLAGS += -ggdb
 CPPFLAGS += -I include
+LDFLAGS := -n -nostdlib -lgcc -T Link.ld
 
-all: kernel
-
-kernel: LDFLAGS += -n -nostdlib -T Link.ld
 kernel: $(OBJ)
 	$(LINK.c) $^ -o $@
 
+
+DEP := $(OBJ:.o=.d)
 DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
-%.o: %.c $.d
-	$(COMPILE.c) $(DEPFLAGS) -o $@ $<
-%.o: %.S %.d
-	$(COMPILE.S) $(DEPFLAGS) -o $@ $<
+$(OBJ): CPPFLAGS += $(DEPFLAGS)
 %.d: ;
 
 
