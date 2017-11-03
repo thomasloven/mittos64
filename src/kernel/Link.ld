@@ -7,4 +7,9 @@ SECTIONS
     *(.multiboot)
     *(.text)
   }
+
+  .data :
+  {
+    *(.data)
+  }
 }
