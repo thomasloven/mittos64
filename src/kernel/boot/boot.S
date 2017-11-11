@@ -1,12 +1,10 @@
 .intel_syntax noprefix
 
-.section .data
-check_cpuid_stack_top:
-  .long 0
-  .long 0
-  .long 0
-check_cpuid_stack:
-  nop
+.section .bss
+.align 0x1000
+.skip 0x1000
+BootStack:
+.byte 0
 
 .section .text
 
@@ -18,7 +16,6 @@ error:
   jmp $
 
 check_cpuid:
-  mov check_cpuid_stack, esp
   pushfd
   pushfd
   xor dword ptr[esp], 1<<21
@@ -51,8 +48,9 @@ check_longmode:
 _start:
 cli
 
+mov esp, offset BootStack
+
 call check_cpuid
 call check_longmode
-
 
 jmp $

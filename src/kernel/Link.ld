@@ -8,8 +8,8 @@ SECTIONS
     *(.text)
   }
 
-  .data :
+  .bss :
   {
-    *(.data)
+    *(.bss)
   }
 }
