@@ -53,4 +53,33 @@ mov esp, offset BootStack
 call check_cpuid
 call check_longmode
 
+mov eax, cr4
+or eax, 1<<5
+mov cr4, eax
+
+mov eax, offset BootP4
+mov cr3, eax
+
+mov ecx, 0x0C0000080
+rdmsr
+or eax, 1<<8
+wrmsr
+
+mov eax, cr0
+or eax, 1<<31
+mov cr0, eax
+
+lgdt [BootGDTp]
+
+mov eax, 0x10
+mov ss, eax
+mov ds, eax
+mov es, eax
+
+.extern long_mode_start
+  jmp 0x8:long_mode_start
+
+.code64
+long_mode_start:
+
 jmp $
