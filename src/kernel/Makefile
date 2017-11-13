@@ -22,13 +22,13 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 $(OBJ): CPPFLAGS += $(DEPFLAGS)
 %.d: ;
 
+DESTDIR ?= $(BUILDROOT)sysroot
 
 # Copy kernel to sysroot
-$(BUILDROOT)sysroot/kernel: kernel
-	mkdir -p $(BUILDROOT)sysroot
-	cp kernel $(BUILDROOT)sysroot/kernel
+$(DESTDIR)$(PREFIX)/kernel: kernel
+	install -D kernel $(DESTDIR)$(PREFIX)/kernel
 
-install: $(BUILDROOT)sysroot/kernel
+install: $(DESTDIR)$(PREFIX)/kernel
 
 clean:
 	rm -rf $(OBJ) $(DEP) kernel
