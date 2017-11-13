@@ -10,8 +10,8 @@ apk add qemu-system-x86_64 gdb
 rm -rf /var/cache/apk/*
 
 target=x86_64-elf
-binutils=binutils-2.26
-gcc=gcc-6.1.0
+binutils=binutils-2.29
+gcc=gcc-7.2.0
 
 
 cd /opt
