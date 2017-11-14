@@ -1,8 +1,9 @@
+#include <x86_64/memory.h>
 .intel_syntax noprefix
 
 .section .bss
-.align 0x1000
-.skip 0x1000
+.align PAGE_SIZE
+.skip PAGE_SIZE
 BootStack:
 .byte 0
 
@@ -71,15 +72,18 @@ mov cr0, eax
 
 lgdt [BootGDTp]
 
-mov eax, 0x10
-mov ss, eax
-mov ds, eax
-mov es, eax
 
 .extern long_mode_start
   jmp 0x8:long_mode_start
 
 .code64
 long_mode_start:
+
+mov eax, 0x0
+mov ss, eax
+mov ds, eax
+mov es, eax
+mov fs, eax
+mov gs, eax
 
 jmp $
