@@ -5,7 +5,8 @@ apk add gmp-dev mpfr-dev mpc1-dev
 
 apk add make
 apk add grub-bios xorriso
-apk add qemu-system-x86_64 gdb
+apk add gdb
+apk --update add qemu-system-x86_64 --repository http://dl-cdn.alpinelinux.org/alpine/v3.7/main
 
 rm -rf /var/cache/apk/*
 
@@ -24,7 +25,7 @@ mkdir binutils-build && cd binutils-build
   --disable-werror \
   --with-sysroot \
 
-make
+make -j 4
 make install
 
 cd /opt
@@ -37,7 +38,7 @@ mkdir gcc-build && cd gcc-build
   --enable-languages=c \
   --without-headers \
 
-make all-gcc all-target-libgcc
+make all-gcc all-target-libgcc -j 4
 make install-gcc install-target-libgcc
 
 apk del build-base
