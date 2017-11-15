@@ -8,14 +8,60 @@ end
 
 target remote :1234
 
+set height 0
+set width 0
+
 define q
 monitor quit
 end
 
-define reg
-monitor info registers
-end
-
 define reset
 monitor system_reset
+end
+
+define mmap
+monitor info mem
+end
+
+python
+
+import re
+
+class Reg(gdb.Command):
+
+  def __init__(self):
+    super(Reg, self).__init__("reg", gdb.COMMAND_USER)
+
+  def invoke(self, arg, from_tty):
+    regs = gdb.execute('monitor info registers', False, True)
+
+    if not arg:
+    # If no argument was given, print the output from qemu
+      print regs
+      return
+
+    if arg.upper() in ['CS', 'DS', 'ES', 'FS', 'GS', 'SS', 'LDT', 'TR']:
+    # Code selectors may contain equals signs
+      for l in regs.splitlines():
+        if l.startswith(arg.upper()):
+          print l
+    elif arg.upper() in ['EFL', 'RFL']:
+    # The xFLAGS registers contains equals signs
+      for l in regs.splitlines():
+        if arg.upper() in l:
+          print ' '.join(l.split()[1:])
+          # The xFLAGS register is the second one on the line
+    else:
+    # Split at any word followed by and equals sign
+    # Clean up both sides of the split and put into a dictionary
+    # then print the requested register value
+      regex = re.compile("[A-Z0-9]+\s?=")
+      names = [v[:-1].strip() for v in regex.findall(regs)]
+      values = [v.strip() for v in regex.split(regs)][1:]
+      regs = dict(zip(names, values))
+      print "%s=%s" % (arg.upper(), regs[arg.upper()])
+
+
+Reg()
+
 end
