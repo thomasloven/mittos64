@@ -12,19 +12,32 @@ BootStack:
 .code32
 error:
   // Print "ERR!" in upper left corner
-  mov [0xb8000], dword ptr 0x4f524f45
-  mov [0xb8004], dword ptr 0x4f214f52
+  mov [0xb8000], dword ptr 0x4f004f00
+  mov [0xb8004], dword ptr 0x4f004f00
+  mov [0xb8000], byte ptr 'E'
+  mov [0xb8002], byte ptr 'R'
+  mov [0xb8004], byte ptr 'R'
+  mov [0xb8006], byte ptr '!'
   jmp $
 
 check_cpuid:
+  // Save EFLAGS
   pushfd
+
+  // Try to modify EFLAGS.ID
   pushfd
-  xor dword ptr[esp], 1<<21
+  xor dword ptr [esp], 1<<21
   popfd
+
+  //Read EFLAGS into eax
   pushfd
   pop eax
-  xor eax, [esp]
+
+  // Restore original EFLAGS
   popfd
+
+  // Check if EFLAGS.ID was modified
+  xor eax, [esp+4]
   and eax, 1<<21
   jz error
   ret
@@ -47,43 +60,41 @@ check_longmode:
 
 .global _start
 _start:
-cli
+  cli
 
-mov esp, offset BootStack
+  mov esp, offset BootStack
 
-call check_cpuid
-call check_longmode
+  call check_cpuid
+  call check_longmode
 
-mov eax, cr4
-or eax, 1<<5
-mov cr4, eax
+  mov eax, cr4
+  or eax, 1<<5
+  mov cr4, eax
 
-mov eax, offset BootP4
-mov cr3, eax
+  mov eax, offset BootP4
+  mov cr3, eax
 
-mov ecx, 0x0C0000080
-rdmsr
-or eax, 1<<8
-wrmsr
+  mov ecx, 0x0C0000080
+  rdmsr
+  or eax, 1<<8
+  wrmsr
 
-mov eax, cr0
-or eax, 1<<31
-mov cr0, eax
+  mov eax, cr0
+  or eax, 1<<31
+  mov cr0, eax
 
-lgdt [BootGDTp]
+  lgdt [BootGDTp]
 
-
-.extern long_mode_start
   jmp 0x8:long_mode_start
 
 .code64
-long_mode_start:
+  long_mode_start:
 
-mov eax, 0x0
-mov ss, eax
-mov ds, eax
-mov es, eax
-mov fs, eax
-mov gs, eax
+  mov eax, 0x0
+  mov ss, eax
+  mov ds, eax
+  mov es, eax
+  mov fs, eax
+  mov gs, eax
 
-jmp $
+  jmp $
