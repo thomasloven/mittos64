@@ -59,5 +59,11 @@ _start:
 
   upper_memory:
 
+  mov rax, KERNEL_OFFSET
+  add rsp, rax
+
+  mov rax, 0
+  movabs [BootP4], rax
+
   //; Loop infinitely
   jmp $
