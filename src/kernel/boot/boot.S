@@ -14,7 +14,7 @@ _start:
   cli
 
   //; Set up a known stack
-  mov esp, offset BootStack
+  mov esp, offset V2P(BootStack)
 
   //; Set CR4.PAE
   //; enabling Page Address Extension
@@ -23,7 +23,7 @@ _start:
   mov cr4, eax
 
   //; Load a P4 page table
-  mov eax, offset BootP4
+  mov eax, offset V2P(BootP4)
   mov cr3, eax
 
   //; Set EFER.LME
@@ -40,10 +40,10 @@ _start:
   mov cr0, eax
 
   //; Load a new GDT
-  lgdt [BootGDTp]
+  lgdt [V2P(BootGDTp)]
 
   //; and update the code selector by a long jump
-  jmp 0x8:long_mode_start
+  jmp 0x8:V2P(long_mode_start)
 
 .code64
   long_mode_start:
@@ -53,6 +53,11 @@ _start:
   mov ss, eax
   mov ds, eax
   mov es, eax
+
+  movabs rax, offset upper_memory
+  jmp rax
+
+  upper_memory:
 
   //; Loop infinitely
   jmp $

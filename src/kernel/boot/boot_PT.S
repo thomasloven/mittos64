@@ -5,17 +5,18 @@
 .align PAGE_SIZE
 .global BootP4
 BootP4:
-  .quad offset BootP3 + (PAGE_PRESENT | PAGE_WRITE)
-  .rept ENTRIES_PER_PT - 1
+  .quad offset V2P(BootP3) + (PAGE_PRESENT | PAGE_WRITE)
+  .rept ENTRIES_PER_PT - 2
     .quad 0
   .endr
+  .quad offset V2P(BootP3) + (PAGE_PRESENT | PAGE_WRITE)
 BootP3:
-  .quad offset BootP2 + (PAGE_PRESENT | PAGE_WRITE)
+  .quad offset V2P(BootP2) + (PAGE_PRESENT | PAGE_WRITE)
   .rept ENTRIES_PER_PT - 1
     .quad 0
   .endr
 BootP2:
-  .quad offset BootP1 + (PAGE_PRESENT | PAGE_WRITE)
+  .quad offset V2P(BootP1) + (PAGE_PRESENT | PAGE_WRITE)
   .rept ENTRIES_PER_PT - 1
     .quad 0
   .endr
