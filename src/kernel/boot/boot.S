@@ -65,5 +65,6 @@ _start:
   mov rax, 0
   movabs [BootP4], rax
 
-  //; Loop infinitely
-  jmp $
+.extern kmain
+  movabs rax, offset kmain
+  jmp rax

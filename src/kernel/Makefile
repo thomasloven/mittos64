@@ -6,7 +6,7 @@ SRC := $(wildcard **/*.[cS])
 OBJ := $(patsubst %, %.o, $(basename $(SRC)))
 
 CFLAGS ?= -Wall -Wextra -pedantic
-CFLAGS += -ffreestanding
+CFLAGS += -ffreestanding -mcmodel=large
 CFLAGS += -ggdb -O0
 ASFLAGS += -ggdb
 CPPFLAGS += -I include
