@@ -1,6 +1,19 @@
 #pragma once
 #define KERNEL_OFFSET 0xFFFFFF8000000000
+
+#ifdef __ASSEMBLER__
 #define V2P(a) ((a) - KERNEL_OFFSET)
+#define P2V(a) ((a) + KERNEL_OFFSET)
+#else
+#include <stdint.h>
+#define V2P(a) ((uintptr_t)(a) - KERNEL_OFFSET)
+#define P2V(a) ((void *)((uintptr_t)(a) + KERNEL_OFFSET))
+#endif
+
+#define P1_OFFSET(a) (((a)>>12) & 0x1FF)
+#define P2_OFFSET(a) (((a)>>21) & 0x1FF)
+#define P3_OFFSET(a) (((a)>>30) & 0x1FF)
+#define P4_OFFSET(a) (((a)>>39) & 0x1FF)
 
 #define PAGE_PRESENT      0x001
 #define PAGE_WRITE        0x002

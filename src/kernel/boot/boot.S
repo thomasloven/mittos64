@@ -54,17 +54,24 @@ _start:
   mov ds, eax
   mov es, eax
 
+  //; Jump to kernel address space
   movabs rax, offset upper_memory
   jmp rax
 
   upper_memory:
 
+  //; Move stack pointer to kernel space
   mov rax, KERNEL_OFFSET
   add rsp, rax
 
+  //; Remove identity mapping
   mov rax, 0
   movabs [BootP4], rax
 
+  //; Jump to kmain()
 .extern kmain
   movabs rax, offset kmain
-  jmp rax
+  call rax
+
+  hlt
+  jmp $

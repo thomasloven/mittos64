@@ -2,14 +2,14 @@
 
 void clear_screen()
 {
-  unsigned char *vidmem = (void *)(0xB8000 + KERNEL_OFFSET);
+  unsigned char *vidmem = P2V(0xB8000);
   for(int i=0; i < 80*24*2; i++)
     *vidmem++ = 0;
 }
 
 void print_string(char *str)
 {
-  unsigned char *vidmem = (void *)(0xB8000 + KERNEL_OFFSET);
+  unsigned char *vidmem = P2V(0xB8000);
   while(*str)
   {
     *vidmem++ = *str++;
