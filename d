@@ -25,7 +25,7 @@ fi
 # If so, execute the command in the running container
 #if docker ps -f name=${imagename}-run | grep ${imagename}-run ; then
 if [[ $(docker ps -q -f name=${imagename}-run) ]]; then
-  docker exec -it ${imagename}-run "$@"
+  docker exec -it -u $(id -u):$(id -g) ${imagename}-run "$@"
 else
-  docker run -it --rm -v ${buildroot}:/opt --name ${imagename}-run ${imagename} "$@"
+  docker run -it --rm -v ${buildroot}:/opt --name ${imagename}-run -u $(id -u):$(id -g) ${imagename} "$@"
 fi
