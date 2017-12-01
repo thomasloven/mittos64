@@ -1,4 +1,6 @@
 #include <memory.h>
+#include <serial.h>
+#include <debug.h>
 
 void clear_screen()
 {
@@ -17,10 +19,20 @@ void print_string(char *str)
   }
 }
 
+void vga_write(char c)
+{
+// TODO: DUMMY
+  (void)c;
+}
+
 void kmain()
 {
   clear_screen();
   print_string("Hello from c, world!");
+
+  serial_init(PORT_COM1);
+  debug_printf("Hello from debug printing function!\n");
+  debug_printf("A number:%d\n", 12345);
   for(;;);
 }
 

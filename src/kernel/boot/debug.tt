@@ -20,11 +20,11 @@ void vga_write(char c)
   static int i = 0;
   vga_recv[i++] = c;
 }
-void serial_write(int port, char c)
+void serial_write(uint16_t port, uint8_t c)
 {
   (void)port;
   static int i = 0;
-  serial_recv[i++] = c;
+  serial_recv[i++] = (char)c;
 }
 
 TEST(putch_sends_character_to_vga)

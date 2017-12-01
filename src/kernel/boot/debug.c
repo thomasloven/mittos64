@@ -1,11 +1,10 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <serial.h>
 
 // TODO: Temporary declarations
 void vga_write(char c);
-void serial_write(int port, char c);
-#define PORT_COM1 0
 
 
 void num2str(char *buf, uint64_t num, uint64_t base)
