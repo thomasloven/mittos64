@@ -3,9 +3,8 @@
 apk --update add build-base
 apk add gmp-dev mpfr-dev mpc1-dev
 
-apk add make
 apk add grub-bios xorriso
-apk add gdb
+apk add gdb valgrind
 apk --update add qemu-system-x86_64 --repository http://dl-cdn.alpinelinux.org/alpine/v3.7/main
 
 rm -rf /var/cache/apk/*
@@ -40,8 +39,6 @@ mkdir gcc-build && cd gcc-build
 
 make all-gcc all-target-libgcc -j 4
 make install-gcc install-target-libgcc
-
-apk del build-base
 
 cd /
 rm -rf /opt
