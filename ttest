@@ -6,6 +6,7 @@ dirs=src/kernel
 
 main()
 {
+  failed=0
   for dir in $dirs; do
     local files=`find $dir -name "*.tt"`
     for f in $files; do
@@ -16,11 +17,12 @@ main()
 
       outfile=`mktemp`
       cc $f.c -o $outfile -ggdb -I $dir/include 2>&1 | sed -e 's/\.tt\.c:/\.tt:/'
-      $outfile $f
+      $outfile $f || failed=1
       rm $f.c $outfile
     done
   done
 
+  exit $failed
 
 }
 
