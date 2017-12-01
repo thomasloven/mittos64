@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -e
+
+dirs=src/kernel
+
+main()
+{
+  for dir in $dirs; do
+    local files=`find $dir -name "*.tt"`
+    for f in $files; do
+
+      cp $f $f.c
+      tests=`sed -n -e 's/^\s*TEST(\([^,]*,\).*$/ttt_\1/p' $f`
+      echo "tt_test tt_tests[] = {${tests}0};" >> $f.c
+
+      outfile=`mktemp`
+      cc $f.c -o $outfile -ggdb -I $dir/include
+      $outfile $f
+      rm $f.c $outfile
+    done
+  done
+
+
+}
+
+main "$@"
