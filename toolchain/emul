@@ -3,7 +3,8 @@
 if [ -z ${MITTOS64+x} ]; then >&2 echo "Unsupported environment! See README"; exit 1; fi
 
 iso=${BUILDROOT}mittos64.iso
+seriallog=${BUILDROOT}serial.log
 
 ${BUILDROOT}toolchain/mkiso
 
-qemu-system-x86_64 -s -S -cdrom ${iso} $@
+qemu-system-x86_64 -s -S -cdrom ${iso} -serial file:${seriallog} $@
