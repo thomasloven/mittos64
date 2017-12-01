@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef void (*tt_test)(void);
 
@@ -16,13 +17,38 @@ extern tt_test tt_tests[];
   #define TT_BUFFER_SIZE 512
 #endif
 
+#define TT_CLR_RED ((tt_color)?"\x1b[31m":"")
+#define TT_CLR_GRN ((tt_color)?"\x1b[32m":"")
+#define TT_CLR_BLU ((tt_color)?"\x1b[34m":"")
+#define TT_CLR_RES ((tt_color)?"\x1b[0m":"")
+
 #define TT_FAIL(error, ...) dprintf(tt_fd[1], "\"%s\" Line %d: %s >> " error "\n", tt_filename, __LINE__, tt_current_test, __VA_ARGS__);
 
 #define ASSERT_EQUAL(type, pf, lhs, rhs) do { \
-  type tt_lhs = (lhs); \
-  type tt_rhs = (rhs); \
+  type tt_lhs = (type)(lhs); \
+  type tt_rhs = (type)(rhs); \
   if(tt_lhs == tt_rhs) return; \
-  TT_FAIL("Expected <%" pf "> got <%" pf ">", rhs, lhs); \
+  TT_FAIL("Expected <%" pf "> got <%" pf ">", tt_rhs, tt_lhs); \
+  exit(1); \
+}while(0);
+#define ASSERT_NOT_EQUAL(type, pf, lhs, rhs) do { \
+  type tt_lhs = (type)(lhs); \
+  type tt_rhs = (type)(rhs); \
+  if(tt_lhs != tt_rhs) return; \
+  TT_FAIL("Got <%" pf "> but expected anything else", tt_rhs); \
+  exit(1); \
+}while(0);
+
+#define ASSERT_STRN(lhs, rhs, n) do { \
+  size_t tt_n = (size_t)(n); \
+  char *tt_lhs = malloc(tt_n); \
+  char *tt_rhs = malloc(tt_n); \
+  memcpy(tt_lhs, (lhs), tt_n); \
+  memcpy(tt_rhs, (rhs), tt_n); \
+  tt_rhs[tt_n] = tt_lhs[tt_n] = '\0'; \
+  if(!(strncmp(tt_lhs, tt_rhs, tt_n))) {free(tt_lhs); free(tt_rhs); return;} \
+  TT_FAIL("Expected <%s> got <%s>\n", tt_rhs, tt_lhs); \
+  free(tt_lhs); free(tt_rhs); \
   exit(1); \
 }while(0);
 
@@ -63,29 +89,43 @@ int main(int argc, char **argv)
     int bytes = 0;
     if(bytes = read(tt_fd[0], buffer, TT_BUFFER_SIZE))
     {
-      printf("%sF%s", tt_color?"\x1b[31m":"", tt_color?"\x1b[0m":"");
+      failed = 1;
       errors[failures] = buffer;
-      failures ++;
       buffer = malloc(TT_BUFFER_SIZE);
-    } else {
-      printf("%s.%s", tt_color?"\x1b[32m":"", tt_color?"\x1b[0m":"");
     }
-    waitpid(pid, 0,0);
+    int status;
+    waitpid(pid, &status, 0);
+    if(!WIFEXITED(status))
+    {
+      failed = 1;
+      sprintf(buffer, "\"%s\" >> TEST %d CRASHED\n", tt_filename, i+1);
+      errors[failures] = buffer;
+      buffer = malloc(TT_BUFFER_SIZE);
+    }
     close(tt_fd[0]);
+    if(failed)
+    {
+      failures++;
+      printf("%sF%s", TT_CLR_RED, TT_CLR_RES);
+    }
+    else
+    {
+      printf("%s.%s", TT_CLR_GRN, TT_CLR_RES);
+    }
     i++;
   }
 
   printf("\n");
-  printf("%s----------------------------------------%s\n", tt_color?"\x1b[32m":"", tt_color?"\x1b[0m":"");
+  printf("%s----------------------------------------%s\n", TT_CLR_BLU, TT_CLR_RES);
   printf("Ran %d tests in %s\n", i, tt_filename);
   free(buffer);
   if(failures)
   {
-    printf("%sFAILED%s (failures=%d)\n", tt_color?"\x1b[31m":"", tt_color?"\x1b[0m":"", failures);
+    printf("%sFAILED%s (failures=%d)\n", TT_CLR_RED, TT_CLR_RES, failures);
     i = 0;
     while(errors[i])
     {
-  printf("%s========================================%s\n", tt_color?"\x1b[1;34m":"", tt_color?"\x1b[0m":"");
+  printf("%s========================================%s\n", TT_CLR_BLU, TT_CLR_RES);
       printf("%s", errors[i]);
       free(errors[i]);
       i++;
