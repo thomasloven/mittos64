@@ -15,7 +15,7 @@ main()
       echo "tt_test tt_tests[] = {${tests}0};" >> $f.c
 
       outfile=`mktemp`
-      cc $f.c -o $outfile -ggdb -I $dir/include
+      cc $f.c -o $outfile -ggdb -I $dir/include 2>&1 | sed -e 's/\.tt\.c:/\.tt:/'
       $outfile $f
       rm $f.c $outfile
     done
