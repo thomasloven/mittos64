@@ -1,0 +1,117 @@
+// vim: ft=c
+#include <ttest.h>
+#include "debug.c"
+
+#define BUFFER_SIZE 16
+char vga_recv[BUFFER_SIZE];
+char serial_recv[BUFFER_SIZE];
+
+BEFORE()
+{
+  for(int i = 0; i < BUFFER_SIZE; i++)
+  {
+    vga_recv[i] = '\0';
+    serial_recv[i] = '\0';
+  }
+}
+
+void vga_write(char c)
+{
+  static int i = 0;
+  vga_recv[i++] = c;
+}
+void serial_write(int port, char c)
+{
+  (void)port;
+  static int i = 0;
+  serial_recv[i++] = c;
+}
+
+TEST(putch_sends_character_to_vga)
+{
+  char input = 'a';
+  debug_putch(input);
+  ASSERT_EQ_CHR(vga_recv[0], input);
+}
+TEST(putch_sends_character_to_serial)
+{
+  char input = 'a';
+  debug_putch(input);
+  ASSERT_EQ_CHR(serial_recv[0], input);
+}
+
+TEST(putsn_writes_string)
+{
+  char *str = "hello";
+  debug_putsn(str, 5);
+  ASSERT_EQ_STR(vga_recv, str, BUFFER_SIZE);
+}
+TEST(putsn_writes_correct_number_of_characters)
+{
+  char *str = "1234567890";
+  debug_putsn(str, 5);
+  ASSERT_EQ_STR(vga_recv, "12345", BUFFER_SIZE);
+}
+TEST(puts_writes_string)
+{
+  char *str = "world";
+  debug_puts(str);
+  ASSERT_EQ_STR(vga_recv, str, BUFFER_SIZE);
+}
+
+TEST(printf_prints_string)
+{
+  char *str = "Hello, world!";
+  debug_printf(str);
+  ASSERT_EQ_STR(vga_recv, str, BUFFER_SIZE);
+}
+TEST(printf_does_not_print_percent)
+{
+  debug_printf("123%d", 45);
+  ASSERT_NEQ_CHR(vga_recv[3], '%');
+}
+TEST(printf_prints_binary_number)
+{
+  debug_printf("%b", 0x55aa);
+  ASSERT_EQ_STR(vga_recv, "101010110101010", BUFFER_SIZE);
+}
+TEST(printf_prints_ocal_number)
+{
+  debug_printf("%o", 8);
+  ASSERT_EQ_STR(vga_recv, "10", BUFFER_SIZE);
+}
+TEST(printf_prints_decimal_number)
+{
+  debug_printf("%d", 123);
+  ASSERT_EQ_STR(vga_recv, "123", BUFFER_SIZE);
+}
+TEST(printf_prints_hexadecimal_number)
+{
+  debug_printf("%x", 42);
+  ASSERT_EQ_STR(vga_recv, "2A", BUFFER_SIZE);
+}
+TEST(printf_prints_char)
+{
+  debug_printf("%c", 'X');
+  ASSERT_EQ_STR(vga_recv, "X", BUFFER_SIZE);
+}
+TEST(printf_prints_passed_string)
+{
+  debug_printf("%s", "asdf");
+  ASSERT_EQ_STR(vga_recv, "asdf", BUFFER_SIZE);
+}
+TEST(printf_keeps_printing_after_number)
+{
+  debug_printf("%x123", 0);
+  ASSERT_EQ_STR(vga_recv, "0123", BUFFER_SIZE);
+}
+TEST(printf_prints_text_around_number)
+{
+  debug_printf("ABC%dDEF", 0);
+  ASSERT_EQ_STR(vga_recv, "ABC0DEF", BUFFER_SIZE);
+}
+TEST(printf_keeps_going_for_unknown_format_specifier)
+{
+  debug_printf("%y");
+  ASSERT_EQ_STR(vga_recv, "%y", BUFFER_SIZE);
+}
