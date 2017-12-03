@@ -27,16 +27,18 @@ extern tt_test tt_tests[];
 #define ASSERT_EQUAL(type, pf, lhs, rhs) do { \
   type tt_lhs = (type)(lhs); \
   type tt_rhs = (type)(rhs); \
-  if(tt_lhs == tt_rhs) return; \
+  if(tt_lhs != tt_rhs) { \
   TT_FAIL("Expected <%" pf "> got <%" pf ">", tt_rhs, tt_lhs); \
   exit(1); \
+  } \
 }while(0);
 #define ASSERT_NOT_EQUAL(type, pf, lhs, rhs) do { \
   type tt_lhs = (type)(lhs); \
   type tt_rhs = (type)(rhs); \
-  if(tt_lhs != tt_rhs) return; \
+  if(tt_lhs == tt_rhs) { \
   TT_FAIL("Got <%" pf "> but expected anything else", tt_rhs); \
   exit(1); \
+  } \
 }while(0);
 
 #define ASSERT_STRN(lhs, rhs, n) do { \
@@ -46,10 +48,12 @@ extern tt_test tt_tests[];
   memcpy(tt_lhs, (lhs), tt_n); \
   memcpy(tt_rhs, (rhs), tt_n); \
   tt_rhs[tt_n] = tt_lhs[tt_n] = '\0'; \
-  if(!(strncmp(tt_lhs, tt_rhs, tt_n))) {free(tt_lhs); free(tt_rhs); return;} \
+  if(strncmp(tt_lhs, tt_rhs, tt_n)) { \
   TT_FAIL("Expected <%s> got <%s>\n", tt_rhs, tt_lhs); \
   free(tt_lhs); free(tt_rhs); \
   exit(1); \
+  } \
+  free(tt_lhs); free(tt_rhs); \
 }while(0);
 
 #define TEST(name, body) void ttt_##name() { tt_current_test = #name; if(tt_before) tt_before(); body }

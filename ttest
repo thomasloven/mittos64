@@ -14,7 +14,7 @@ main()
       echo "tt_test tt_tests[] = {${tests}0};" >> $suite.c
 
       test_exec=`mktemp`
-      compiler_output=`cc $suite.c -o $test_exec -ggdb -I $dir/include 2>&1`
+      compiler_output=`cc $suite.c -o $test_exec -ggdb -I $dir/include -DTTEST 2>&1`
       compiler_status=$?
 
       echo -e "\x1b[35m$suite\x1b[0m"
