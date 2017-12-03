@@ -41,8 +41,8 @@ extern tt_test tt_tests[];
 
 #define ASSERT_STRN(lhs, rhs, n) do { \
   size_t tt_n = (size_t)(n); \
-  char *tt_lhs = malloc(tt_n); \
-  char *tt_rhs = malloc(tt_n); \
+  char *tt_lhs = malloc(tt_n+1); \
+  char *tt_rhs = malloc(tt_n+1); \
   memcpy(tt_lhs, (lhs), tt_n); \
   memcpy(tt_rhs, (rhs), tt_n); \
   tt_rhs[tt_n] = tt_lhs[tt_n] = '\0'; \
