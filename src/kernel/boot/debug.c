@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <serial.h>
+#include <vga.h>
 
 // TODO: Temporary declarations
 void vga_write(char c);

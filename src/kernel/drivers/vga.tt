@@ -1,0 +1,79 @@
+// vim: ft=c
+#include <ttest.h>
+
+#include <vga.h>
+#undef VGA_MEMORY
+#define VGA_MEMORY calloc(80*24,3)
+#include "vga.c"
+
+#include <stdint.h>
+
+struct cell
+{
+  uint8_t c;
+  uint8_t f;
+}__attribute__((packed));
+
+struct cell *cells;
+
+BEFORE()
+{
+  vga_init();
+  cells = vidmem;
+  cells[VGA_COLS*VGA_ROWS].c = '$';
+}
+
+#define VGA_ASSERT_EQ(pos, ch) ASSERT_EQ_CHR(cells[(pos)].c, (ch))
+
+
+TEST(vga_starts_with_a_clear_screen)
+{
+  VGA_ASSERT_EQ(VGA_COLS*VGA_ROWS-1, '\0');
+}
+
+TEST(vga_write_adds_character_to_vidmem)
+{
+  vga_write('a');
+  VGA_ASSERT_EQ(0, 'a');
+}
+
+TEST(vga_output_is_visible)
+{
+  vga_write('a');
+  ASSERT_NEQ_INT(cells[0].f, 0);
+}
+
+TEST(vga_write_adds_multiple_characters_to_vidmem)
+{
+  vga_write('a');
+  vga_write('b');
+  VGA_ASSERT_EQ(1, 'b');
+}
+
+TEST(vga_writes_entire_screen_full)
+{
+  for(int i = 0; i < VGA_COLS*VGA_ROWS; i++)
+    vga_write('x');
+
+  VGA_ASSERT_EQ(VGA_POS(VGA_ROWS-1, VGA_COLS-1), 'x');
+}
+TEST(vga_does_not_overflow_memory_area)
+{
+  for(int i = 0; i < (VGA_COLS*VGA_ROWS+1); i++)
+    vga_write('x');
+  VGA_ASSERT_EQ(VGA_COLS*VGA_ROWS, '$');
+}
+
+TEST(newline_moves_down_one_line_when_at_beginning)
+{
+  vga_write('\n');
+  vga_write('a');
+  VGA_ASSERT_EQ(VGA_POS(1,0), 'a');
+}
+TEST(newline_moves_to_beginning_of_line)
+{
+  vga_write('a');
+  vga_write('\n');
+  vga_write('b');
+  VGA_ASSERT_EQ(VGA_POS(1,0), 'b');
+}
