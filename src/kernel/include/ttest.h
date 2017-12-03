@@ -116,7 +116,7 @@ int main(int argc, char **argv)
   }
 
   printf("\n");
-  printf("%s----------------------------------------%s\n", TT_CLR_BLU, TT_CLR_RES);
+  /* printf("%s----------------------------------------%s\n", TT_CLR_BLU, TT_CLR_RES); */
   printf("Ran %d tests in %s\n", i, tt_filename);
   free(buffer);
   if(failures)
