@@ -1,0 +1,72 @@
+// vim: ft=c
+#include <ttest.h>
+#include <string.h>
+#include "string.c"
+
+char *lipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus interdum eros at enim tempus sed.";
+
+char dst[100];
+
+BEFORE()
+{
+for(int i = 0; i < 100; dst[i++] = '\0');
+}
+
+TEST(memcpy_copies_data)
+{
+  my_memcpy(dst, lipsum, 100);
+  ASSERT_EQ_STR(dst, lipsum, 100);
+}
+TEST(memcpy_doesnt_copy_too_much)
+{
+  my_memcpy(dst, lipsum, 10);
+  ASSERT_EQ_CHR(dst[10], 0);
+}
+
+TEST(memset_sets_data)
+{
+  memset(dst, 0, 10);
+  my_memset(dst, 'a', 5);
+  ASSERT_EQ_STR(dst, "aaaaa", 100);
+}
+
+// Those test won't pass right now since our memmove implementation is
+// incomplete (see string.c)
+
+/*TEST(memmove_moves_data)
+{
+  memcpy(&dst[10], "12345", 5);
+  my_memmove(dst, &dst[10], 5);
+  ASSERT_EQ_STR(dst, "12345", 5);
+}*/
+/*TEST(memmove_handles_overlap)
+{
+  memcpy(&dst[5], "1234567890", 10);
+  my_memmove(dst, &dst[5], 10);
+  ASSERT_EQ_STR(dst, "1234567890", 10);
+}*/
+/*TEST(memmove_handles_overlap_the_other_way)
+{
+  memcpy(dst, "1234567890", 10);
+  my_memmove(&dst[5], dst, 10);
+  ASSERT_EQ_STR(&dst[5], "1234567890", 10);
+}*/
+
+TEST(memcmp_returns_zero_for_equal_strings)
+{
+  ASSERT_EQ_INT(my_memcmp("1234", "1234", 4), 0);
+}
+TEST(memcmp_returns_difference_for_unequal_strings)
+{
+  ASSERT_EQ_INT(my_memcmp("1234", "0234", 4), 1);
+}
+TEST(memcmp_returns_signed_difference_for_unequal_strings)
+{
+  ASSERT_EQ_INT(my_memcmp("1234", "1236", 4), -2);
+}
+
+TEST(strlen_counts_correctly)
+{
+  ASSERT_EQ_INT(my_strlen("12345"), 5);
+}
+
