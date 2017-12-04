@@ -8,4 +8,5 @@
 [Chapter 3: Activate Long Mode](3_Activate_Long_Mode.md)<br>
 [Chapter 4: "Higher Half" Kernel](4_Higher_Half_Kernel.md)<br>
 [Chapter 5: Unit Testing Framework](5_Unit_Testing.md)<br>
+[Chapter 6: Debug output](6_Debug_Output.md)<br>
 
