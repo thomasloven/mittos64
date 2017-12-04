@@ -52,10 +52,10 @@ TEST(vga_write_adds_multiple_characters_to_vidmem)
 
 TEST(vga_writes_entire_screen_full)
 {
-  for(int i = 0; i < VGA_COLS*VGA_ROWS; i++)
+  for(int i = 0; i < (VGA_COLS*VGA_ROWS-1); i++)
     vga_write('x');
 
-  VGA_ASSERT_EQ(VGA_POS(VGA_ROWS-1, VGA_COLS-1), 'x');
+  VGA_ASSERT_EQ(VGA_POS(VGA_ROWS-1, VGA_COLS-2), 'x');
 }
 TEST(vga_does_not_overflow_memory_area)
 {
@@ -76,4 +76,44 @@ TEST(newline_moves_to_beginning_of_line)
   vga_write('\n');
   vga_write('b');
   VGA_ASSERT_EQ(VGA_POS(1,0), 'b');
+}
+
+void vga_write_str(char *str)
+{
+  while(*str) vga_write(*str++);
+}
+
+TEST(writing_past_end_of_screen_scrolls_screen_one_line)
+{
+  vga_write_str("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n");
+  vga_write_str("11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n");
+  vga_write_str("21\n22\n23\n24\n");
+
+  vga_write_str("abcde");
+  VGA_ASSERT_EQ(0, '2');
+}
+TEST(screen_does_not_scroll_until_write)
+{
+  vga_write_str("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n");
+  vga_write_str("11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n");
+  vga_write_str("21\n22\n23\n24");
+  vga_write_str("34567890123456789012345678901234567890123456789012345678901234567890123456789");
+
+  VGA_ASSERT_EQ(0, '1');
+}
+TEST(writing_past_end_of_screen_clears_last_line)
+{
+  vga_write_str("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n");
+  vga_write_str("11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n");
+  vga_write_str("21\n22\n23\n24\n");
+  vga_write('a');
+  VGA_ASSERT_EQ(VGA_POS(VGA_ROWS-1, 1), '\0');
+}
+TEST(first_character_of_new_line_is_not_cleared)
+{
+  vga_write_str("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n");
+  vga_write_str("11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n");
+  vga_write_str("21\n22\n23\n24\n");
+  vga_write('a');
+  VGA_ASSERT_EQ(VGA_POS(VGA_ROWS-1, 0), 'a');
 }
