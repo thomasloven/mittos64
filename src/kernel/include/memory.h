@@ -8,6 +8,7 @@
 #include <stdint.h>
 #define V2P(a) ((uintptr_t)(a) & ~KERNEL_OFFSET)
 #define P2V(a) ((void *)((uintptr_t)(a) | KERNEL_OFFSET))
+#define incptr(p, n) ((void *)(((uintptr_t)(p)) + (n)))
 #endif
 
 #define P1_OFFSET(a) (((a)>>12) & 0x1FF)

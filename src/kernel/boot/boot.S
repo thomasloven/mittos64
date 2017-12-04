@@ -13,6 +13,9 @@ BootStack:
 _start:
   cli
 
+  mov edi, eax
+  mov esi, ebx
+
   //; Set up a known stack
   mov esp, offset V2P(BootStack)
 
