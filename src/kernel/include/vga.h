@@ -12,3 +12,8 @@
 
 void vga_init();
 void vga_write(char c);
+
+#define VGA_ADDRESS_PORT 0x3D4
+#define VGA_DATA_PORT 0x3D5
+#define VGA_REGISTER_CURSOR_POS_LOW 0xF
+#define VGA_REGISTER_CURSOR_POS_HIGH 0xE

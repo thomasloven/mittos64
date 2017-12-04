@@ -23,10 +23,10 @@ void vga_init()
 
 void movecursor()
 {
-  outb(0x3D4, 0x0F);
-  outb(0x3D5, (uint8_t)(cursor & 0xFF));
-  outb(0x3D4, 0x0E);
-  outb(0x3D5, (uint8_t)((cursor >> 8) & 0xFF));
+  outb(VGA_ADDRESS_PORT, VGA_REGISTER_CURSOR_POS_LOW);
+  outb(VGA_DATA_PORT, (uint8_t)(cursor & 0xFF));
+  outb(VGA_ADDRESS_PORT, VGA_REGISTER_CURSOR_POS_HIGH);
+  outb(VGA_DATA_PORT, (uint8_t)((cursor >> 8) & 0xFF));
 }
 
 void flush()
