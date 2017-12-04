@@ -42,21 +42,28 @@ extern tt_test tt_tests[];
 }while(0);
 
 #define ASSERT_STRN(lhs, rhs, n) do { \
+  char *tt_lhs = (char *)(lhs); \
+  char *tt_rhs = (char *)(rhs); \
+  if(!tt_lhs || !tt_rhs) \
+  { \
+    TT_FAIL("Expected string, got null pointer\n", 0); \
+    exit(1); \
+  } \
   size_t tt_n = (size_t)(n); \
-  char *tt_lhs = malloc(tt_n+1); \
-  char *tt_rhs = malloc(tt_n+1); \
-  memcpy(tt_lhs, (lhs), tt_n); \
-  memcpy(tt_rhs, (rhs), tt_n); \
-  tt_rhs[tt_n] = tt_lhs[tt_n] = '\0'; \
-  if(strncmp(tt_lhs, tt_rhs, tt_n)) { \
-  TT_FAIL("Expected <%s> got <%s>\n", tt_rhs, tt_lhs); \
-  free(tt_lhs); free(tt_rhs); \
+  char *tt_lhs_c = malloc(tt_n+1); \
+  char *tt_rhs_c = malloc(tt_n+1); \
+  memcpy(tt_lhs_c, tt_lhs, tt_n); \
+  memcpy(tt_rhs_c, tt_rhs, tt_n); \
+  tt_rhs_c[tt_n] = tt_lhs_c[tt_n] = '\0'; \
+  if(strncmp(tt_lhs_c, tt_rhs_c, tt_n)) { \
+  TT_FAIL("Expected <%s> got <%s>\n", tt_rhs_c, tt_lhs_c); \
+  free(tt_lhs_c); free(tt_rhs_c); \
   exit(1); \
   } \
-  free(tt_lhs); free(tt_rhs); \
+  free(tt_lhs_c); free(tt_rhs_c); \
 }while(0);
 
-#define TEST(name, body) void ttt_##name() { tt_current_test = #name; if(tt_before) tt_before(); body }
+#define TEST(name, ...) void ttt_##name() { tt_current_test = #name; if(tt_before) tt_before(); __VA_ARGS__ }
 
 #define BEFORE(body) void tt_before() { body }
 
