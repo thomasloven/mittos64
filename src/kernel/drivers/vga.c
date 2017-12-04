@@ -1,5 +1,6 @@
 #include <vga.h>
 #include <memory.h>
+#include <ports.h>
 
 void *vidmem;
 struct vga_cell{
@@ -18,6 +19,14 @@ void vga_init()
   memset(vidmem, 0, VGA_SIZE*2);
 
   format = 0x7;
+}
+
+void movecursor()
+{
+  outb(0x3D4, 0x0F);
+  outb(0x3D5, (uint8_t)(cursor & 0xFF));
+  outb(0x3D4, 0x0E);
+  outb(0x3D5, (uint8_t)((cursor >> 8) & 0xFF));
 }
 
 void flush()
@@ -53,4 +62,5 @@ void vga_write(char c)
   }
   scroll();
   flush();
+  movecursor();
 }

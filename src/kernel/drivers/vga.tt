@@ -1,6 +1,9 @@
 // vim: ft=c
 #include <ttest.h>
 
+#include <ports.h>
+#undef outb
+#define outb(...)
 #include <vga.h>
 #undef VGA_MEMORY
 #define VGA_MEMORY calloc(80*24,3)
