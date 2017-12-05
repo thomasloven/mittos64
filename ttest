@@ -13,7 +13,7 @@ main()
       local tests=`sed -n -e 's/^\s*TEST(\([^,]*,\).*$/ttt_\1/p' $suite`
       echo "tt_test tt_tests[] = {${tests}0};" >> $suite.c
 
-      test_exec=`mktemp`
+      test_exec=`mktemp /tmp/tmp.XXXXXX`
       compiler_output=`cc $suite.c -o $test_exec -ggdb -I $dir/include -DTTEST 2>&1`
       compiler_status=$?
 

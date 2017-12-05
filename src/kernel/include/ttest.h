@@ -98,7 +98,7 @@ int main(int argc, char **argv)
     close(tt_fd[1]);
     int failed = 0;
     int bytes = 0;
-    if(bytes = read(tt_fd[0], buffer, TT_BUFFER_SIZE))
+    if((bytes = read(tt_fd[0], buffer, TT_BUFFER_SIZE)))
     {
       failed = 1;
       errors[failures] = buffer;
