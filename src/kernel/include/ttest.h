@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef void (*tt_test)(void);
+typedef int (*tt_test)(void);
 
 char *tt_filename;
 char *tt_current_test;
@@ -30,7 +30,7 @@ extern char *tt_test_names[];
   type tt_rhs = (type)(rhs); \
   if(tt_lhs != tt_rhs) { \
   TT_FAIL("Expected <%" pf "> got <%" pf ">", tt_rhs, tt_lhs); \
-  exit(1); \
+  return 1; \
   } \
 }while(0);
 #define ASSERT_NOT_EQUAL(type, pf, lhs, rhs) do { \
@@ -38,7 +38,7 @@ extern char *tt_test_names[];
   type tt_rhs = (type)(rhs); \
   if(tt_lhs == tt_rhs) { \
   TT_FAIL("Got <%" pf "> but expected anything else", tt_rhs); \
-  exit(1); \
+  return 1; \
   } \
 }while(0);
 
@@ -47,8 +47,8 @@ extern char *tt_test_names[];
   char *tt_rhs = (char *)(rhs); \
   if(!tt_lhs || !tt_rhs) \
   { \
-    TT_FAIL("Expected string, got null pointer\n", 0); \
-    exit(1); \
+    TT_FAIL("Expected string, got null pointer", 0); \
+    return 1; \
   } \
   size_t tt_n = (size_t)(n); \
   char *tt_lhs_c = malloc(tt_n+1); \
@@ -57,18 +57,26 @@ extern char *tt_test_names[];
   memcpy(tt_rhs_c, tt_rhs, tt_n); \
   tt_rhs_c[tt_n] = tt_lhs_c[tt_n] = '\0'; \
   if(strncmp(tt_lhs_c, tt_rhs_c, tt_n)) { \
-  TT_FAIL("Expected <%s> got <%s>\n", tt_rhs_c, tt_lhs_c); \
+  TT_FAIL("Expected <%s> got <%s>", tt_rhs_c, tt_lhs_c); \
   free(tt_lhs_c); free(tt_rhs_c); \
-  exit(1); \
+  return 1; \
   } \
   free(tt_lhs_c); free(tt_rhs_c); \
 }while(0);
 
-#define TEST(name void ttt_##name()
+#define ASSERT_EQ_INT(lhs, rhs) ASSERT_EQUAL(int, "d", lhs, rhs)
+#define ASSERT_NEQ_INT(lhs, rhs) ASSERT_NOT_EQUAL(int, "d", lhs, rhs)
+#define ASSERT_EQ_CHR(lhs, rhs) ASSERT_EQUAL(char, "c", lhs, rhs)
+#define ASSERT_NEQ_CHR(lhs, rhs) ASSERT_NOT_EQUAL(char, "c", lhs, rhs)
+#define ASSERT_EQ_STR(lhs, rhs, n) ASSERT_STRN(lhs, rhs, n)
+
+#define TEST(name) int ttt_##name()
 
 #define BEFORE(body) void tt_before() { body }
+#define AFTER(body) void tt_after() { body }
 
 void __attribute__((weak)) tt_before(void);
+void __attribute__((weak)) tt_after(void);
 
 int main(int argc, char **argv)
 {
@@ -94,8 +102,9 @@ int main(int argc, char **argv)
       close(tt_fd[0]);
       tt_current_test = tt_test_names[i];
       if(tt_before) tt_before();
-      tt_tests[i]();
-      exit(0);
+      int result = tt_tests[i]();
+      if(tt_after) tt_after();
+      exit(result);
     }
 
     close(tt_fd[1]);
