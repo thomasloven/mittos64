@@ -130,20 +130,20 @@ int main(int argc, char **argv)
   }
 
   printf("\n");
-  /* printf("%s----------------------------------------%s\n", TT_CLR_BLU, TT_CLR_RES); */
   printf("Ran %d tests in %s\n", i, tt_filename);
   free(buffer);
   if(failures)
   {
     printf("%sFAILED%s (failures=%d)\n", TT_CLR_RED, TT_CLR_RES, failures);
     i = 0;
+    printf("%s========================================%s\n", TT_CLR_RED, TT_CLR_RES);
     while(errors[i])
     {
-  printf("%s========================================%s\n", TT_CLR_BLU, TT_CLR_RES);
-      printf("%s", errors[i]);
+      printf("%p %s", errors[i], errors[i]);
       free(errors[i]);
       i++;
     }
+    printf("%s========================================%s\n", TT_CLR_RED, TT_CLR_RES);
   }
   free(errors);
   return failures;
