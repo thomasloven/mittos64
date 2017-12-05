@@ -72,8 +72,8 @@ extern char *tt_test_names[];
 
 #define TEST(name) int ttt_##name()
 
-#define BEFORE(body) void tt_before() { body }
-#define AFTER(body) void tt_after() { body }
+#define BEFORE() void tt_before()
+#define AFTER() void tt_after()
 
 void __attribute__((weak)) tt_before(void);
 void __attribute__((weak)) tt_after(void);
