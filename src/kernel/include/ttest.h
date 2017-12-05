@@ -12,6 +12,7 @@ int tt_fd[2];
 int tt_color = 1;
 
 extern tt_test tt_tests[];
+extern char *tt_test_names[];
 
 #ifndef TT_BUFFER_SIZE
   #define TT_BUFFER_SIZE 512
@@ -63,7 +64,7 @@ extern tt_test tt_tests[];
   free(tt_lhs_c); free(tt_rhs_c); \
 }while(0);
 
-#define TEST(name, ...) void ttt_##name() { tt_current_test = #name; if(tt_before) tt_before(); __VA_ARGS__ }
+#define TEST(name void ttt_##name()
 
 #define BEFORE(body) void tt_before() { body }
 
@@ -91,6 +92,8 @@ int main(int argc, char **argv)
     if(!(pid = fork()))
     {
       close(tt_fd[0]);
+      tt_current_test = tt_test_names[i];
+      if(tt_before) tt_before();
       tt_tests[i]();
       exit(0);
     }

@@ -10,8 +10,15 @@ main()
     for suite in $files; do
 
       cp $suite $suite.c
-      local tests=`sed -n -e 's/^\s*TEST(\([^,]*,\).*$/ttt_\1/p' $suite`
-      echo "tt_test tt_tests[] = {${tests}0};" >> $suite.c
+      local tests=`sed -n -e 's/^\s*TEST(\([^,]*\)).*$/ttt_\1/p' $suite`
+
+      echo "tt_test tt_tests[] = {" >> $suite.c
+      for t in $tests; do echo "$t," >> $suite.c; done
+      echo "0};" >> $suite.c
+
+      echo "char *tt_test_names[] = {" >> $suite.c
+      for t in $tests; do echo "\"$t\"," >> $suite.c; done
+      echo "\"\"};" >> $suite.c
 
       test_exec=`mktemp /tmp/tmp.XXXXXX`
       compiler_output=`cc $suite.c -o $test_exec -ggdb -I $dir/include -DTTEST 2>&1`
