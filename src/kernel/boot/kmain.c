@@ -13,9 +13,9 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
 
   parse_multiboot(multiboot_magic, P2V(multiboot_data));
 
-  debug_printf("Hello from debug printing function!\n");
-  debug_printf("A number:%d\n", 12345);
-  debug_printf("Multiboot data: %x, magic: %x\n", multiboot_data, multiboot_magic);
+  debug_printf("Kernel was loaded with command line \"%s\", by <%s>\n", kernel_boot_data.commandline, kernel_boot_data.bootloader);
+
+  debug_printf("Boot \"Complete\"\n");
 
   PANIC("Reached end of kernel main function\n");
   for(;;);
