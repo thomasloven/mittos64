@@ -1,6 +1,12 @@
 #pragma once
 #include <stdint.h>
 
+#define IDT_INTERRUPT 0xE
+#define IDT_DPL0 0x0
+#define IDT_PRESENT 0x80
+
+#define NUM_INTERRUPTS 256
+
 struct int_gate_descriptor
 {
   uint16_t base_l;
@@ -54,8 +60,6 @@ debug("R12=%016x R13=%016x R14=%016x R15=%016x\n", r->r12, r->r13, r->r14, r->r1
 debug("RIP=%016x RFL=%016x\n", r->rip, r->rflags); \
 debug("CS=%016x SS=%016x\n", r->cs, r->ss);
 
-
 void load_idt(struct idtr *);
 
-#define NUM_INTERRUPTS 256
 void interrupt_init();

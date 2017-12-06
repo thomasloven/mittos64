@@ -24,7 +24,7 @@ void interrupt_init()
 
   for(int i=0; i < NUM_INTERRUPTS; i++)
   {
-    idt_set_gate(i, isr_table[i], 0x8, 0, 0x8E);
+    idt_set_gate(i, isr_table[i], 0x8, 0, IDT_PRESENT | IDT_DPL0 | IDT_INTERRUPT);
   }
 
   idtr.addr = idt;
