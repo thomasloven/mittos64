@@ -9,4 +9,5 @@
 [Chapter 4: "Higher Half" Kernel](4_Higher_Half_Kernel.md)<br>
 [Chapter 5: Unit Testing Framework](5_Unit_Testing.md)<br>
 [Chapter 6: Debug output](6_Debug_Output.md)<br>
+[Chapter 7: Multiboot Data](7_Multiboot_Data.md)<br>
 
