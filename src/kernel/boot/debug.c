@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <serial.h>
 #include <vga.h>
+#include <memory.h>
 
 // TODO: Temporary declarations
 void vga_write(char c);
@@ -69,6 +70,18 @@ void debug_vprintf(char *fmt, va_list args)
   }
 
   fmt++;
+  size_t padwidth = 0;
+  char padchar = ' ';
+  if(*fmt == '0')
+  {
+    padchar = '0';
+    fmt++;
+  }
+  while(*fmt >= '0' && *fmt <= '9')
+  {
+    padwidth *= 10;
+    padwidth += (int)(*fmt++ - '0');
+  }
   uint64_t base = 0;
   switch(*fmt)
   {
@@ -100,6 +113,9 @@ void debug_vprintf(char *fmt, va_list args)
     uintmax_t number = va_arg(args, uintmax_t);
     char buf[128];
     num2str(buf, number, base);
+    if(padwidth > strlen(buf))
+      for(size_t i = 0; i < (padwidth - strlen(buf)); i++)
+        debug_putch(padchar);
     debug_puts(buf);
   }
 

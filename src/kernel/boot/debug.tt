@@ -115,3 +115,18 @@ TEST(printf_keeps_going_for_unknown_format_specifier)
   debug_printf("%y");
   ASSERT_EQ_STR(vga_recv, "%y", BUFFER_SIZE);
 }
+TEST(printf_pads_value)
+{
+  debug_printf("%5d", 123);
+  ASSERT_EQ_STR(vga_recv, "  123", BUFFER_SIZE);
+}
+TEST(printf_pads_more_than_9)
+{
+  debug_printf("%16d", 1);
+  ASSERT_EQ_STR(vga_recv, "               1", BUFFER_SIZE);
+}
+TEST(printf_zero_pads)
+{
+  debug_printf("%05d", 123);
+  ASSERT_EQ_STR(vga_recv, "00123", BUFFER_SIZE);
+}
