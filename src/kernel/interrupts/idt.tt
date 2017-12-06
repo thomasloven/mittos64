@@ -1,0 +1,31 @@
+// vim: ft=c
+#include <ttest.h>
+#include <debug.h>
+#undef debug
+#define debug(...)
+#include "idt.c"
+
+uintptr_t isr_table[] ={};
+void load_idt(struct idtr *_)
+{
+  (void)_;
+}
+
+TEST(idt_set_gate_correctly_sets_address_L)
+{
+  idt_set_gate(1, 0x1234567890ABCDEF, 0, 0, 0);
+
+  ASSERT_EQ_INT(idt[1].base_l, 0xCDEF);
+}
+TEST(idt_set_gate_correctly_sets_address_M)
+{
+  idt_set_gate(1, 0x1234567890ABCDEF, 0, 0, 0);
+
+  ASSERT_EQ_INT(idt[1].base_m, 0x90AB);
+}
+TEST(idt_set_gate_correctly_sets_address_H)
+{
+  idt_set_gate(1, 0x1234567890ABCDEF, 0, 0, 0);
+
+  ASSERT_EQ_INT(idt[1].base_h, 0x12345678);
+}

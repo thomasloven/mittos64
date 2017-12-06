@@ -2,8 +2,8 @@ ifeq ($(MITTOS64),)
 $(error Unsupported environment! See README)
 endif
 
-SRC := $(wildcard **/*.[cS])
-OBJ := $(patsubst %, %.o, $(basename $(SRC)))
+SRC := $(wildcard **/*.[cS]*)
+OBJ := $(patsubst %, %.o, $(basename $(basename $(SRC))))
 
 CFLAGS ?= -Wall -Wextra -pedantic
 CFLAGS += -ffreestanding -mcmodel=large
@@ -19,6 +19,9 @@ LDFLAGS := -n -nostdlib -lgcc -T Link.ld
 
 kernel: $(OBJ)
 	$(LINK.c) $^ -o $@
+
+%.S: %.S.py
+	python $^ > $@
 
 # Automatically generate dependency files
 # Those keep track of which header files are used by which source files
@@ -39,6 +42,7 @@ clean:
 	rm -rf $(OBJ) $(DEP) kernel
 
 .PHONY: install clean
+.INTERMEDIATE: $(basename $(filter %.py, $(SRC)))
 
 # Include generated dependency files
 include $(DEP)
