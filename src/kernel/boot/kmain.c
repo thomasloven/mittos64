@@ -3,8 +3,7 @@
 #include <vga.h>
 #include <debug.h>
 #include <multiboot.h>
-
-void interrupt_init();
+#include <interrupts.h>
 
 void kmain(uint64_t multiboot_magic, void *multiboot_data)
 {
