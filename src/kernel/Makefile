@@ -20,8 +20,8 @@ LDFLAGS := -n -nostdlib -lgcc -T Link.ld
 kernel: $(OBJ)
 	$(LINK.c) $^ -o $@
 
-%.S: %.S.py
-	python $^ > $@
+%.o: %.S.py
+	python $^ | $(COMPILE.S) $(DEPFLAGS) -x assembler-with-cpp - -o $@
 
 # Automatically generate dependency files
 # Those keep track of which header files are used by which source files
@@ -42,7 +42,6 @@ clean:
 	rm -rf $(OBJ) $(DEP) kernel
 
 .PHONY: install clean
-.INTERMEDIATE: $(basename $(filter %.py, $(SRC)))
 
 # Include generated dependency files
 include $(DEP)
