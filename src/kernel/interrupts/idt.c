@@ -38,5 +38,7 @@ registers *int_handler(registers *r)
   debug("Unhandled interrupt occurred\n");
   debug("Interrupt number: %d Error code: %d\n", r->int_no, r->err_code);
   debug_print_registers(r);
+
+  PANIC("Unhandled interrupt occurred");
   for(;;);
 }

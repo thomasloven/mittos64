@@ -83,3 +83,17 @@ class Reg(gdb.Command):
 Reg()
 
 end
+
+define restore_env
+set $name = $arg0
+python
+
+registers = {r: gdb.parse_and_eval('$name->' + r) for r in
+['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'rbp', 'rsp', 'r8', 'r9', 'r10',
+'r11', 'r12', 'r13', 'r14', 'r15', 'rip']}
+
+for r in registers.items():
+  gdb.parse_and_eval('$%s=%s' % r)
+gdb.execute('frame 0')
+end
+end
