@@ -7,8 +7,13 @@ OBJ := $(patsubst %, %.o, $(basename $(SRC)))
 
 CFLAGS ?= -Wall -Wextra -pedantic
 CFLAGS += -ffreestanding -mcmodel=large
+ifndef NDEBUG
 CFLAGS += -ggdb -O0
 ASFLAGS += -ggdb
+else
+CFLAGS += -O3 -mno-sse
+CPPFLAGS += -DNDEBUG
+endif
 CPPFLAGS += -I include
 LDFLAGS := -n -nostdlib -lgcc -T Link.ld
 

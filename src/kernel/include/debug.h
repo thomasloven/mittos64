@@ -2,7 +2,11 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+#ifndef NDEBUG
 #define debug(...) debug_printf(__VA_ARGS__)
+#else
+#define debug(...)
+#endif
 
 void debug_putch(char c);
 void debug_putsn(char *s, size_t n);
