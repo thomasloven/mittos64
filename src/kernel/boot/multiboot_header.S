@@ -1,14 +1,8 @@
 #include <multiboot.h>
 .section .multiboot
 
-.align 0x4
-MultibootHeader1:
-.long MBOOT1_MAGIC
-.long MBOOT1_FLAGS
-.long MBOOT1_CS
-
 .align 0x8
-MultibootHeader2:
+Multiboot2Header:
 .long MBOOT2_MAGIC
 .long MBOOT2_ARCH
 .long MBOOT2_LENGTH
@@ -17,4 +11,4 @@ MultibootHeader2:
 .short 0
 .short 0
 .long 8
-MultibootHeader2End:
+Multiboot2HeaderEnd:
