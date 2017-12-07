@@ -1,0 +1,25 @@
+#!/bin/sh
+
+function ce()
+{
+  echo -e "${@}"
+}
+
+red="\x1b[31m"
+yellow="\x1b[33m"
+green="\x1b[32m"
+blue="\x1b[34m"
+normal="\x1b[0m"
+
+function colorize()
+{
+  echo "$1" | sed \
+    -e "s/^\[INFO\]/\[$(ce $blue)INFO$(ce $normal)\]/" \
+    -e "s/^\[OK\]/\[$(ce $green)OK$(ce $normal)\]/" \
+    -e "s/^\[WARNING\]/\[$(ce $yellow)WARNING$(ce $normal)\]/" \
+    -e "s/^\[ERROR\]/\[$(ce $red)ERROR$(ce $normal)\]/"
+}
+
+tail -f $1 | while read line; do
+  colorize "$line"
+done
