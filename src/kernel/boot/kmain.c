@@ -10,6 +10,10 @@ void kmain()
 
   debug("Hello from debug printing function!\n");
   debug("A number:%d\n", 12345);
+  debug_info("Here's some info\n");
+  debug_ok("This thing worked well!\n");
+  debug_warning("Careful!\n");
+  debug_error("Something went wrong!\n");
   for(;;);
 }
 
