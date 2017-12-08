@@ -43,7 +43,7 @@ _start:
   lgdt [V2P(BootGDTp)]
 
   //; and update the code selector by a long jump
-  jmp 0x8:V2P(long_mode_start)
+jmp 0x8:V2P(long_mode_start)
 
 .code64
   long_mode_start:
@@ -67,6 +67,9 @@ _start:
   //; Remove identity mapping
   mov rax, 0
   movabs [BootP4], rax
+
+  mov rax, cr3
+  mov cr3, rax
 
   //; Jump to kmain()
 .extern kmain
