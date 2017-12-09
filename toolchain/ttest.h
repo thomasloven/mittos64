@@ -105,19 +105,19 @@ int main(int argc, char **argv)
     }
 
     close(tt_fd[1]);
+    int status;
+    waitpid(pid, &status, 0);
     int failed = 0;
     if(read(tt_fd[0], buffer, TT_BUFFER_SIZE))
     {
       failed = 1;
     }
-    int status;
-    waitpid(pid, &status, 0);
+    close(tt_fd[0]);
     if(!WIFEXITED(status))
     {
       failed = 1;
       sprintf(buffer, "\"%s\" >> TEST %d CRASHED\n", tt_filename, i+1);
     }
-    close(tt_fd[0]);
     if(failed)
     {
       failures++;
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
     printf("%sFAILED%s (failures=%d)\n", TT_CLR_RED, TT_CLR_RES, failures);
     i = 0;
     printf("%s========================================%s\n", TT_CLR_RED, TT_CLR_RES);
-    while(errors[i])
+    while(i < failures)
     {
       printf("%s", errors[i]);
       free(errors[i]);
