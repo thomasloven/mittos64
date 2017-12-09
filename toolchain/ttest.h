@@ -84,14 +84,11 @@ int main(int argc, char **argv)
 
   if(!isatty(1)) tt_color = 0;
 
-  int i = 0;
-  while(tt_tests[i++]);
-
-  char **errors = calloc(i, sizeof(char*));
   char *buffer = malloc(TT_BUFFER_SIZE);
+  char **errors = 0;
 
   int failures = 0;
-  i = 0;
+  int i = 0;
   while(tt_tests[i])
   {
     fflush(stdout);
@@ -109,12 +106,9 @@ int main(int argc, char **argv)
 
     close(tt_fd[1]);
     int failed = 0;
-    int bytes = 0;
-    if((bytes = read(tt_fd[0], buffer, TT_BUFFER_SIZE)))
+    if(read(tt_fd[0], buffer, TT_BUFFER_SIZE))
     {
       failed = 1;
-      errors[failures] = buffer;
-      buffer = malloc(TT_BUFFER_SIZE);
     }
     int status;
     waitpid(pid, &status, 0);
@@ -122,13 +116,14 @@ int main(int argc, char **argv)
     {
       failed = 1;
       sprintf(buffer, "\"%s\" >> TEST %d CRASHED\n", tt_filename, i+1);
-      errors[failures] = buffer;
-      buffer = malloc(TT_BUFFER_SIZE);
     }
     close(tt_fd[0]);
     if(failed)
     {
       failures++;
+      errors = realloc(errors, failures*sizeof(char *));
+      errors[failures-1] = buffer;
+      buffer = malloc(TT_BUFFER_SIZE);
       printf("%sF%s", TT_CLR_RED, TT_CLR_RES);
     }
     else
@@ -148,12 +143,13 @@ int main(int argc, char **argv)
     printf("%s========================================%s\n", TT_CLR_RED, TT_CLR_RES);
     while(errors[i])
     {
-      printf("%p %s", errors[i], errors[i]);
+      printf("%s", errors[i]);
       free(errors[i]);
       i++;
     }
     printf("%s========================================%s\n", TT_CLR_RED, TT_CLR_RES);
-  }
   free(errors);
+  }
+
   return failures;
 }
