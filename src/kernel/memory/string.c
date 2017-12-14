@@ -29,16 +29,26 @@ void *memset(void *s, int c, size_t n)
 }
 
 #ifdef TTEST
-void *my_memmove(void *dest, const void *src, size_t n)
+void *my_memmove(void *dst, const void *src, size_t n)
 #else
-void *memmove(void *dest, const void *src, size_t n)
+void *memmove(void *dst, const void *src, size_t n)
 #endif
 {
-  // We'll need some form of malloc to implement a good memmove.
-  // For now, we'll just use defer to memcpy - WHICH IS UNSAFE!
-  // TODO: Write a good implementation of memmove
-  memcpy(dest, src, n);
-  return dest;
+  if(src == dst)
+    return dst;
+
+  const void *src_end = (const void *)((uintptr_t)src + n);
+  if(src < dst && dst < src_end)
+  {
+    char *dp = dst;
+    const char *sp = src;
+    while(n--)
+      dp[n] = sp[n];
+    return dst;
+  }
+
+  memcpy(dst, src, n);
+  return dst;
 }
 
 #ifdef TTEST

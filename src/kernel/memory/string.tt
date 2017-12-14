@@ -30,27 +30,36 @@ TEST(memset_sets_data)
   ASSERT_EQ_STR(dst, "aaaaa", 100);
 }
 
-// Those test won't pass right now since our memmove implementation is
-// incomplete (see string.c)
-
-/*TEST(memmove_moves_data)
+TEST(memmove_moves_data)
 {
   memcpy(&dst[10], "12345", 5);
   my_memmove(dst, &dst[10], 5);
   ASSERT_EQ_STR(dst, "12345", 5);
-}*/
-/*TEST(memmove_handles_overlap)
+}
+TEST(memmove_handles_overlap)
 {
   memcpy(&dst[5], "1234567890", 10);
   my_memmove(dst, &dst[5], 10);
   ASSERT_EQ_STR(dst, "1234567890", 10);
-}*/
-/*TEST(memmove_handles_overlap_the_other_way)
+}
+TEST(memmove_handles_overlap_the_other_way)
 {
   memcpy(dst, "1234567890", 10);
   my_memmove(&dst[5], dst, 10);
   ASSERT_EQ_STR(&dst[5], "1234567890", 10);
-}*/
+}
+TEST(memmove_moves_correct_number_of_chars)
+{
+  memcpy(&dst[5], "1234567890", 10);
+  my_memmove(dst, &dst[5], 9);
+  ASSERT_EQ_STR(dst, "123456789567890", 15);
+}
+TEST(memmove_moves_correct_number_of_chars_the_other_way)
+{
+  memcpy(dst, "1234567890", 10);
+  my_memmove(&dst[5], dst, 3);
+  ASSERT_EQ_STR(dst, "1234512390", 10);
+}
 
 TEST(memcmp_returns_zero_for_equal_strings)
 {
