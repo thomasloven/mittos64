@@ -16,9 +16,10 @@ uint8_t format;
 void vga_init()
 {
   vidmem = VGA_MEMORY;
-  memset(vidmem, 0, VGA_SIZE*2);
+  memset(vidmem, 0, VGA_SIZE*sizeof(struct vga_cell));
 
-  format = 0x7;
+  // White text on black background
+  format = 0x07;
 }
 
 void movecursor()
@@ -38,14 +39,12 @@ void scroll()
 {
   while(cursor >= VGA_SIZE)
   {
-    for(int i = 0; i < VGA_ROWS-1; i++)
-      for(int j = 0; j < VGA_COLS; j++)
-        buffer[VGA_POS(i, j)] = buffer[VGA_POS(i+1, j)];
-    for(int i = 0; i < VGA_COLS; i++)
-      buffer[VGA_POS(VGA_ROWS-1, i)] = (struct vga_cell){.c='\0', .f=format};
-  cursor -= VGA_COLS;
+    // Move everything up one row
+    memmove(buffer, &buffer[VGA_POS(1,0)], VGA_COLS*(VGA_ROWS-1)*sizeof(struct vga_cell));
+    // Clear last row
+    memset(&buffer[VGA_POS(VGA_ROWS-1, 0)], 0, VGA_COLS*sizeof(struct vga_cell));
+    cursor -= VGA_COLS;
   }
-
 }
 
 void vga_write(char c)
@@ -53,12 +52,10 @@ void vga_write(char c)
   switch(c)
   {
     case '\n':
-      cursor += VGA_COLS;
-      cursor -= VGA_COL(cursor);
+      cursor += VGA_COLS - VGA_COL(cursor);
       break;
     default:
-      buffer[cursor] = (struct vga_cell){.c = c, .f=format};
-      cursor++;
+      buffer[cursor++] = (struct vga_cell){.c = c, .f=format};
   }
   scroll();
   flush();
