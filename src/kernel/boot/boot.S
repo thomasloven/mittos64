@@ -79,8 +79,6 @@ upper_memory:
   mov ss, rax
   mov ds, rax
   mov es, rax
-  mov fs, rax
-  mov gs, rax
 
   //; Reload CS
   movabs rax, offset .reload_cs
