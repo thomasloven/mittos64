@@ -104,8 +104,6 @@ _start:
   mov ss, eax
   mov ds, eax
   mov es, eax
-  mov fs, eax
-  mov gs, eax
 
   //; Loop infinitely
   jmp $
