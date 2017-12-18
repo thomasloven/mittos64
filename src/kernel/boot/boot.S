@@ -58,7 +58,7 @@ jmp 0x8:V2P(long_mode_start)
   movabs rax, offset upper_memory
   jmp rax
 
-  upper_memory:
+upper_memory:
 
   //; Move stack pointer to kernel space
   mov rax, KERNEL_OFFSET
@@ -68,8 +68,26 @@ jmp 0x8:V2P(long_mode_start)
   mov rax, 0
   movabs [BootP4], rax
 
+  //; Update page tables
   mov rax, cr3
   mov cr3, rax
+
+  //; Reload GDT
+  movabs rax, offset BootGDTp
+  lgdt [rax]
+  mov rax, 0x0
+  mov ss, rax
+  mov ds, rax
+  mov es, rax
+  mov fs, rax
+  mov gs, rax
+
+  //; Reload CS
+  movabs rax, offset .reload_cs
+  pushq 0x8
+  push rax
+  retfq
+.reload_cs:
 
   //; Jump to kmain()
 .extern kmain
