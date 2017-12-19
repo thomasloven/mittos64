@@ -149,3 +149,75 @@ TEST(reads_multiple_tags_4)
   ASSERT_EQ_STR(kernel_boot_data.bootloader, name, strlen(name));
   free(tags);
 }
+
+TEST(reads_mmap_tag)
+{
+  uint32_t mmap[] = {24, 0,
+  0x90ABCDEF, 0x12345678, 0x00010000, 0x00000000, 0x1, 0x0
+  };
+  void *tags = generate_taglist(2,
+    generate_tag(6, mmap, 32),
+    generate_tag(0,0,0)
+  );
+  multiboot_init(MAGIC, tags);
+
+  ASSERT_EQ_INT(kernel_boot_data.mmap_size, 1);
+  free(tags);
+}
+void setup_memory_areas()
+{
+  uint32_t mmap[] = {24, 0,
+  0x90ABCDEF, 0x12345678, 0x00010000, 0x00000000, 0x1, 0x0,
+  0x0ABCDEF1, 0x23456789, 0x00010000, 0x00000000, 0x1, 0x0
+  };
+  void *tags = generate_taglist(2,
+    generate_tag(6, mmap, 56),
+    generate_tag(0,0,0)
+  );
+  multiboot_init(MAGIC, tags);
+}
+TEST(reads_multiple_mmap_tags)
+{
+  setup_memory_areas();
+  ASSERT_EQ_INT(kernel_boot_data.mmap_size, 2);
+}
+TEST(returns_memory_area_start)
+{
+  setup_memory_areas();
+  uintptr_t start, end;
+  uint32_t type;
+  multiboot_get_memory_area(0, &start, &end, &type);
+  ASSERT_EQ_PTR(start, 0x1234567890ABCDEF);
+}
+TEST(returns_memory_area_end)
+{
+  setup_memory_areas();
+  uintptr_t start, end;
+  uint32_t type;
+  multiboot_get_memory_area(0, &start, &end, &type);
+  ASSERT_EQ_PTR(end, 0x1234567890ACCDEF);
+}
+TEST(returns_memory_area_type)
+{
+  setup_memory_areas();
+  uintptr_t start, end;
+  uint32_t type;
+  multiboot_get_memory_area(0, &start, &end, &type);
+  ASSERT_EQ_INT(type, 1);
+}
+TEST(returns_second_memory_area_start)
+{
+  setup_memory_areas();
+  uintptr_t start, end;
+  uint32_t type;
+  multiboot_get_memory_area(1, &start, &end, &type);
+  ASSERT_EQ_PTR(start, 0x234567890ABCDEF1);
+}
+TEST(does_not_return_too_many_areas)
+{
+  setup_memory_areas();
+  uintptr_t start, end;
+  uint32_t type;
+  int retval = multiboot_get_memory_area(2, &start, &end, &type);
+  ASSERT_NEQ_INT(retval, 0);
+}
