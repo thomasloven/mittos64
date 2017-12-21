@@ -9,5 +9,7 @@ void pmm_free(void *c)
 
 void *pmm_alloc()
 {
-  return first;
+  void *c = first;
+  first = 0;
+  return c;
 }
