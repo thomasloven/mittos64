@@ -1,0 +1,32 @@
+// vim: ft=c
+#include <ttest.h>
+
+#include "vmm.c"
+
+void *data;
+uintptr_t *p4, *p3, *p2, *p1;
+
+BEFORE()
+{
+  data = calloc(PAGE_SIZE, 5);
+  p4 = (void *)(((uintptr_t)data + PAGE_SIZE) & ~(PAGE_SIZE-1));
+  p3 = &p4[512];
+  p2 = &p4[1024];
+  p1 = &p4[1536];
+}
+AFTER()
+{
+  free(data);
+}
+
+TEST(get_page_returns_correct_address)
+{
+  p4[0] = (uintptr_t)p3;
+  p3[0] = (uintptr_t)p2;
+  p2[0] = (uintptr_t)p1;
+  p1[0] = 0x1234567890ABC000;
+
+  uintptr_t ret = vmm_get_page(p4, 0);
+
+  ASSERT_EQ_PTR(ret, 0x1234567890ABC000);
+}
