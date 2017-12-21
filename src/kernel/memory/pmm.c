@@ -4,15 +4,15 @@ uintptr_t *first = 0;
 
 void pmm_free(void *c)
 {
-  c = (uintptr_t *)P2V(c);
-  *(uintptr_t *)c = (uintptr_t)first;
+  c = (void *)P2V(c);
+  *(uintptr_t **)c = first;
   first = c;
 }
 
 void *pmm_alloc()
 {
   void *c = first;
-  first = (uintptr_t *)(c?*(uintptr_t *)c:0);
-  c = (uintptr_t *)V2P(c);
+  first = c?*(uintptr_t **)c:0;
+  c = (void *)V2P(c);
   return c;
 }
