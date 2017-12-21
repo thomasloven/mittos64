@@ -1,6 +1,11 @@
 // vim: ft=c
 #include <ttest.h>
 
+#include <memory.h>
+#undef P2V
+#define P2V(addr) (void *)((uintptr_t)(addr))
+#undef V2P
+#define V2P(addr) (void *)((uintptr_t)(addr))
 #include "pmm.c"
 
 struct {
