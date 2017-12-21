@@ -10,4 +10,5 @@
 [Chapter 5: Unit Testing Framework](5_Unit_Testing.md)<br>
 [Chapter 6: Debug output](6_Debug_Output.md)<br>
 [Chapter 7: Multiboot Data](7_Multiboot_Data.md)<br>
+[Chapter 8: Exceptions and Interrupts](8_Exceptions.md)<br>
 
