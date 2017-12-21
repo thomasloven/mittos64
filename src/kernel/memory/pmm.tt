@@ -1,0 +1,15 @@
+// vim: ft=c
+#include <ttest.h>
+
+#include "pmm.c"
+
+struct {
+  uint8_t data[PAGE_SIZE];
+}__attribute__((packed)) mem[4];
+
+TEST(alloc_returns_freed_page)
+{
+  pmm_free(&mem[0]);
+  void *a = pmm_alloc();
+  ASSERT_EQ_PTR(a, &mem[0]);
+}
