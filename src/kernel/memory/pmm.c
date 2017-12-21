@@ -1,18 +1,18 @@
 #include <memory.h>
 
-uintptr_t *first = 0;
+uintptr_t first = 0;
 
-void pmm_free(void *c)
+void pmm_free(uintptr_t page)
 {
-  c = (void *)P2V(c);
-  *(uintptr_t **)c = first;
-  first = c;
+  page = (uintptr_t)P2V(page);
+  *(uintptr_t *)page = first;
+  first = page;
 }
 
-void *pmm_alloc()
+uintptr_t pmm_alloc()
 {
-  void *c = first;
-  first = c?*(uintptr_t **)c:0;
-  c = (void *)V2P(c);
-  return c;
+  uintptr_t page = first;
+  first = page?*(uintptr_t *)page:0;
+  page = (uintptr_t)V2P(page);
+  return page;
 }
