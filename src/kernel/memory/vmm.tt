@@ -30,3 +30,17 @@ TEST(get_page_returns_correct_address)
 
   ASSERT_EQ_PTR(ret, 0x1234567890ABC000);
 }
+TEST(get_page_ignores_flags)
+{
+  p4[0] = (uintptr_t)p3;
+  p4[0] |= 0x123;
+  p3[0] = (uintptr_t)p2;
+  p3[0] |= 0x456;
+  p2[0] = (uintptr_t)p1;
+  p2[0] |= 0x789;
+  p1[0] = 0x1234567890ABCDEF;
+
+  uintptr_t ret = vmm_get_page(p4, 0);
+
+  ASSERT_EQ_PTR(ret, 0x1234567890ABC000);
+}
