@@ -44,3 +44,17 @@ TEST(get_page_ignores_flags)
 
   ASSERT_EQ_PTR(ret, 0x1234567890ABC000);
 }
+TEST(get_page_works_for_different_address)
+{
+  p4[1] = (uintptr_t)p3;
+  p4[1] |= 0x123;
+  p3[2] = (uintptr_t)p2;
+  p3[2] |= 0x456;
+  p2[3] = (uintptr_t)p1;
+  p2[3] |= 0x789;
+  p1[4] = 0x34567890ABCDEF12;
+
+  uintptr_t ret = vmm_get_page(p4, (1UL<<39)+(2UL<<30)+(3UL<<21)+(4UL<<12));
+
+  ASSERT_EQ_PTR(ret, 0x34567890ABCDE000);
+}
