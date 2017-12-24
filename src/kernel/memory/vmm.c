@@ -6,7 +6,16 @@
 union PTE {
   uint64_t value;
   struct {
-    uintptr_t flags:12;
+    uintptr_t present:1;
+    uintptr_t write:1;
+    uintptr_t user:1;
+    uintptr_t write_through:1;
+    uintptr_t nocache:1;
+    uintptr_t accessed:1;
+    uintptr_t dirty:1;
+    uintptr_t huge:1;
+    uintptr_t global:1;
+    uintptr_t flags:3;
   };
 };
 
@@ -19,11 +28,12 @@ union PTE {
 uintptr_t vmm_get_page(void *P4, uintptr_t addr)
 {
   if(P4
-      && P4e(P4, addr).value
-      && P3e(P4, addr).value
-      && P2e(P4, addr).value
+      && P4e(P4, addr).present
+      && P3e(P4, addr).present
+      && P2e(P4, addr).present
+      && P1e(P4, addr).present
     )
     return MASK_FLAGS(P1e(P4, addr).value);
   else
-    return 0;
+    return -1;
 }

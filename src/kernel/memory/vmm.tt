@@ -22,9 +22,12 @@ AFTER()
 TEST(get_page_returns_correct_address)
 {
   p4[0] = (uintptr_t)p3;
+  p4[0] |= PAGE_PRESENT;
   p3[0] = (uintptr_t)p2;
+  p3[0] |= PAGE_PRESENT;
   p2[0] = (uintptr_t)p1;
-  p1[0] = 0x1234567890ABC000;
+  p2[0] |= PAGE_PRESENT;
+  p1[0] = 0x1234567890ABC000 | PAGE_PRESENT;
 
   uintptr_t ret = vmm_get_page(p4, 0);
 
@@ -33,12 +36,12 @@ TEST(get_page_returns_correct_address)
 TEST(get_page_ignores_flags)
 {
   p4[0] = (uintptr_t)p3;
-  p4[0] |= 0x123;
+  p4[0] |= PAGE_PRESENT;
   p3[0] = (uintptr_t)p2;
-  p3[0] |= 0x456;
+  p3[0] |= PAGE_PRESENT;
   p2[0] = (uintptr_t)p1;
-  p2[0] |= 0x789;
-  p1[0] = 0x1234567890ABCDEF;
+  p2[0] |= PAGE_PRESENT;
+  p1[0] = 0x1234567890ABC000 | PAGE_PRESENT;
 
   uintptr_t ret = vmm_get_page(p4, 0);
 
@@ -47,14 +50,28 @@ TEST(get_page_ignores_flags)
 TEST(get_page_works_for_different_address)
 {
   p4[1] = (uintptr_t)p3;
-  p4[1] |= 0x123;
+  p4[1] |= PAGE_PRESENT;
   p3[2] = (uintptr_t)p2;
-  p3[2] |= 0x456;
+  p3[2] |= PAGE_PRESENT;
   p2[3] = (uintptr_t)p1;
-  p2[3] |= 0x789;
-  p1[4] = 0x34567890ABCDEF12;
+  p2[3] |= PAGE_PRESENT;
+  p1[4] = 0x34567890ABCDE000 | PAGE_PRESENT;
 
   uintptr_t ret = vmm_get_page(p4, (1UL<<39)+(2UL<<30)+(3UL<<21)+(4UL<<12));
 
   ASSERT_EQ_PTR(ret, 0x34567890ABCDE000);
+}
+TEST(get_page_fails_if_PTE_not_present)
+{
+  p4[0] = (uintptr_t)p3;
+  p4[0] |= PAGE_PRESENT;
+  p3[0] = (uintptr_t)p2;
+  p3[0] |= PAGE_PRESENT;
+  p2[0] = (uintptr_t)p1;
+  p2[0] |= 0;
+  p1[0] = 0x1234567890ABC000 | PAGE_PRESENT;
+
+  uintptr_t ret = vmm_get_page(p4, 0);
+
+  ASSERT_EQ_PTR(ret, -1);
 }
