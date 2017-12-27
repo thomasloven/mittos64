@@ -75,3 +75,42 @@ TEST(get_page_fails_if_PTE_not_present)
 
   ASSERT_EQ_PTR(ret, -1);
 }
+
+TEST(set_page_sets_page)
+{
+  p4[0] = (uintptr_t)p3;
+  p4[0] |= PAGE_PRESENT;
+  p3[0] = (uintptr_t)p2;
+  p3[0] |= PAGE_PRESENT;
+  p2[0] = (uintptr_t)p1;
+  p2[0] |= PAGE_PRESENT;
+
+  vmm_set_page(p4, 0, 0x1234567890ABC000, PAGE_PRESENT);
+
+  ASSERT_EQ_PTR(p1[0], 0x1234567890ABC000 | PAGE_PRESENT);
+}
+TEST(set_page_returns_success_if_working)
+{
+  p4[0] = (uintptr_t)p3;
+  p4[0] |= PAGE_PRESENT;
+  p3[0] = (uintptr_t)p2;
+  p3[0] |= PAGE_PRESENT;
+  p2[0] = (uintptr_t)p1;
+  p2[0] |= PAGE_PRESENT;
+
+  int retval = vmm_set_page(p4, 0, 0x1234567890ABC000, PAGE_PRESENT);
+
+  ASSERT_EQ_INT(retval, 0);
+}
+TEST(set_page_fails_if_PT_missing)
+{
+  p4[0] = (uintptr_t)p3;
+  p4[0] |= PAGE_PRESENT;
+  p3[0] = (uintptr_t)p2;
+  p2[0] = (uintptr_t)p1;
+  p2[0] |= PAGE_PRESENT;
+
+  int retval = vmm_set_page(p4, 0, 0x1234567890ABC000, PAGE_PRESENT);
+
+  ASSERT_NEQ_INT(retval, 0);
+}

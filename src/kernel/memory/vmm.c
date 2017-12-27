@@ -36,3 +36,16 @@ uintptr_t vmm_get_page(void *P4, uintptr_t addr)
   else
     return -1;
 }
+
+int vmm_set_page(void *P4, uintptr_t addr, uintptr_t page, uint16_t flags)
+{
+  if(!(P4
+      && P4e(P4, addr).present
+      && P3e(P4, addr).present
+      && P2e(P4, addr).present
+    ))
+    return -1;
+
+  P1e(P4, addr).value = page | flags;
+  return 0;
+}
