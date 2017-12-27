@@ -31,9 +31,8 @@ uintptr_t vmm_get_page(void *P4, uintptr_t addr)
       && P4e(P4, addr).present
       && P3e(P4, addr).present
       && P2e(P4, addr).present
-      && P1e(P4, addr).present
     )
-    return MASK_FLAGS(P1e(P4, addr).value);
+    return P1e(P4, addr).value;
   else
     return -1;
 }
