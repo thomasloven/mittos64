@@ -114,3 +114,19 @@ TEST(set_page_fails_if_PT_missing)
 
   ASSERT_NEQ_INT(retval, 0);
 }
+
+uintptr_t pmm_alloc()
+{
+  uintptr_t *pages[] = {p3, p2, p1};
+  static int counter=0;
+  return (uintptr_t)pages[counter++];
+}
+
+TEST(touch_page_adds_P3)
+{
+  p4[0] = 0;
+
+  touch_page(p4, 0, 0);
+
+  ASSERT_NEQ_PTR(p4[0], 0);
+}
