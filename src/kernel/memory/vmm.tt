@@ -124,9 +124,19 @@ uintptr_t pmm_alloc()
 
 TEST(touch_page_adds_P3)
 {
-  p4[0] = 0;
+  touch_page(p4, (1UL<<39)+(2UL<<30)+(3UL<<21)+(4UL<<12), 0);
 
-  touch_page(p4, 0, 0);
+  ASSERT_EQ_PTR(p4[1], (uintptr_t)p3 | PAGE_PRESENT);
+}
+TEST(touch_page_adds_P2)
+{
+  touch_page(p4, (1UL<<39)+(2UL<<30)+(3UL<<21)+(4UL<<12), 0);
 
-  ASSERT_NEQ_PTR(p4[0], 0);
+  ASSERT_EQ_PTR(p3[2], (uintptr_t)p2 | PAGE_PRESENT);
+}
+TEST(touch_page_adds_P1)
+{
+  touch_page(p4, (1UL<<39)+(2UL<<30)+(3UL<<21)+(4UL<<12), 0);
+
+  ASSERT_EQ_PTR(p2[3], (uintptr_t)p1 | PAGE_PRESENT);
 }
