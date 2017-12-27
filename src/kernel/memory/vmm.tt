@@ -119,6 +119,7 @@ uintptr_t pmm_alloc()
 {
   uintptr_t *pages[] = {p3, p2, p1};
   static int counter=0;
+  if(counter >= 3) return 0;
   return (uintptr_t)pages[counter++];
 }
 
@@ -145,4 +146,10 @@ TEST(touch_page_sets_flags)
   touch_page(p4, 0, 0x123);
 
   ASSERT_EQ_PTR(p2[0], (uintptr_t)p1 | 0x123 | PAGE_PRESENT);
+}
+TEST(touch_page_fails_if_out_of_pages)
+{
+  pmm_alloc();
+  int retval = touch_page(p4, 0, 0);
+  ASSERT_NEQ_INT(retval, 0);
 }
