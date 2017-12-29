@@ -155,3 +155,18 @@ TEST(touch_page_fails_if_out_of_pages)
   int retval = touch_page(p4, 0, 0);
   ASSERT_NEQ_INT(retval, 0);
 }
+
+TEST(free_page_unsets_page)
+{
+  p4[1] = (uintptr_t)p3;
+  p4[1] |= PAGE_PRESENT;
+  p3[2] = (uintptr_t)p2;
+  p3[2] |= PAGE_PRESENT;
+  p2[3] = (uintptr_t)p1;
+  p2[3] |= PAGE_PRESENT;
+  p1[4] = PAGE_PRESENT;
+
+  free_page(p4, ADDR1234, 0);
+
+  ASSERT_EQ_PTR(p1[4], 0);
+}

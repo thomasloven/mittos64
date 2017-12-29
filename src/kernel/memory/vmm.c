@@ -71,3 +71,15 @@ int touch_page(void *P4, uintptr_t addr, uint16_t flags)
 
   return 0;
 }
+
+void free_page(void *P4, uintptr_t addr, int free)
+{
+  (void)free;
+  if(!(P4
+      && P4e(P4, addr).present
+      && P3e(P4, addr).present
+      && P2e(P4, addr).present
+    ))
+    return;
+  P1e(P4, addr).value = 0;
+}
