@@ -13,6 +13,6 @@ uintptr_t pmm_alloc()
 {
   uintptr_t page = first;
   first = page?*(uintptr_t *)page:0;
-  page = (uintptr_t)V2P(page);
+  page = (uintptr_t)(page?V2P(page):0);
   return page;
 }
