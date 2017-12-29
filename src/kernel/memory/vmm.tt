@@ -7,6 +7,10 @@ void *data;
 uintptr_t *p4, *p3, *p2, *p1;
 
 #define ADDR1234 ((1UL<<39) + (2UL<<30) + (3UL<<21) + (4UL<<12))
+#define BUILD_PT(o4, o3, o2) \
+  p4[(o4)] = (uintptr_t)p3; p4[(o4)] |= PAGE_PRESENT; \
+  p3[(o3)] = (uintptr_t)p2; p3[(o3)] |= PAGE_PRESENT; \
+  p2[(o2)] = (uintptr_t)p1; p2[(o2)] |= PAGE_PRESENT;
 
 BEFORE()
 {
@@ -23,12 +27,7 @@ AFTER()
 
 TEST(get_page_returns_correct_address)
 {
-  p4[0] = (uintptr_t)p3;
-  p4[0] |= PAGE_PRESENT;
-  p3[0] = (uintptr_t)p2;
-  p3[0] |= PAGE_PRESENT;
-  p2[0] = (uintptr_t)p1;
-  p2[0] |= PAGE_PRESENT;
+  BUILD_PT(0,0,0);
   p1[0] = 0x1234567890ABC000 | PAGE_PRESENT;
 
   uintptr_t ret = vmm_get_page(p4, 0);
@@ -37,12 +36,7 @@ TEST(get_page_returns_correct_address)
 }
 TEST(get_page_ignores_flags)
 {
-  p4[0] = (uintptr_t)p3;
-  p4[0] |= PAGE_PRESENT;
-  p3[0] = (uintptr_t)p2;
-  p3[0] |= PAGE_PRESENT;
-  p2[0] = (uintptr_t)p1;
-  p2[0] |= PAGE_PRESENT;
+  BUILD_PT(0,0,0);
   p1[0] = 0x1234567890ABC000 | PAGE_PRESENT;
 
   uintptr_t ret = vmm_get_page(p4, 0);
@@ -51,12 +45,7 @@ TEST(get_page_ignores_flags)
 }
 TEST(get_page_works_for_different_address)
 {
-  p4[1] = (uintptr_t)p3;
-  p4[1] |= PAGE_PRESENT;
-  p3[2] = (uintptr_t)p2;
-  p3[2] |= PAGE_PRESENT;
-  p2[3] = (uintptr_t)p1;
-  p2[3] |= PAGE_PRESENT;
+  BUILD_PT(1,2,3)
   p1[4] = 0x34567890ABCDE000 | PAGE_PRESENT;
 
   uintptr_t ret = vmm_get_page(p4, ADDR1234);
@@ -65,12 +54,8 @@ TEST(get_page_works_for_different_address)
 }
 TEST(get_page_fails_if_PTE_not_present)
 {
-  p4[0] = (uintptr_t)p3;
-  p4[0] |= PAGE_PRESENT;
-  p3[0] = (uintptr_t)p2;
-  p3[0] |= PAGE_PRESENT;
+  BUILD_PT(0,0,0);
   p2[0] = (uintptr_t)p1;
-  p2[0] |= 0;
   p1[0] = 0x1234567890ABC000 | PAGE_PRESENT;
 
   uintptr_t ret = vmm_get_page(p4, 0);
@@ -80,12 +65,7 @@ TEST(get_page_fails_if_PTE_not_present)
 
 TEST(set_page_sets_page)
 {
-  p4[0] = (uintptr_t)p3;
-  p4[0] |= PAGE_PRESENT;
-  p3[0] = (uintptr_t)p2;
-  p3[0] |= PAGE_PRESENT;
-  p2[0] = (uintptr_t)p1;
-  p2[0] |= PAGE_PRESENT;
+  BUILD_PT(0,0,0);
 
   vmm_set_page(p4, 0, 0x1234567890ABC000, PAGE_PRESENT);
 
@@ -93,12 +73,7 @@ TEST(set_page_sets_page)
 }
 TEST(set_page_returns_success_if_working)
 {
-  p4[0] = (uintptr_t)p3;
-  p4[0] |= PAGE_PRESENT;
-  p3[0] = (uintptr_t)p2;
-  p3[0] |= PAGE_PRESENT;
-  p2[0] = (uintptr_t)p1;
-  p2[0] |= PAGE_PRESENT;
+  BUILD_PT(0,0,0);
 
   int retval = vmm_set_page(p4, 0, 0x1234567890ABC000, PAGE_PRESENT);
 
@@ -106,11 +81,8 @@ TEST(set_page_returns_success_if_working)
 }
 TEST(set_page_fails_if_PT_missing)
 {
-  p4[0] = (uintptr_t)p3;
-  p4[0] |= PAGE_PRESENT;
+  BUILD_PT(0,0,0);
   p3[0] = (uintptr_t)p2;
-  p2[0] = (uintptr_t)p1;
-  p2[0] |= PAGE_PRESENT;
 
   int retval = vmm_set_page(p4, 0, 0x1234567890ABC000, PAGE_PRESENT);
 
@@ -158,12 +130,7 @@ TEST(touch_page_fails_if_out_of_pages)
 
 TEST(free_page_unsets_page)
 {
-  p4[1] = (uintptr_t)p3;
-  p4[1] |= PAGE_PRESENT;
-  p3[2] = (uintptr_t)p2;
-  p3[2] |= PAGE_PRESENT;
-  p2[3] = (uintptr_t)p1;
-  p2[3] |= PAGE_PRESENT;
+  BUILD_PT(1,2,3);
   p1[4] = PAGE_PRESENT;
 
   free_page(p4, ADDR1234, 0);
