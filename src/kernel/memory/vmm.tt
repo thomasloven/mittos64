@@ -146,3 +146,12 @@ TEST(free_page_unsets_P2_entry_if_P1_is_empty)
 
   ASSERT_EQ_PTR(p2[3], 0);
 }
+TEST(free_page_does_not_unset_P2_entry_if_not_asked_to)
+{
+  BUILD_PT(1,2,3);
+  p1[4] = PAGE_PRESENT;
+
+  free_page(p4, ADDR1234, 0);
+
+  ASSERT_NEQ_PTR(p2[3], 0);
+}

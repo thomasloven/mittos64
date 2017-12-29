@@ -83,6 +83,8 @@ void free_page(void *P4, uintptr_t addr, int free)
     return;
   P1e(P4, addr).value = 0;
 
+  if(!free) return;
+
   union PTE *pt;
 
   pt = PT(P2e(P4, addr).value);
