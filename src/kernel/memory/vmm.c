@@ -82,4 +82,24 @@ void free_page(void *P4, uintptr_t addr, int free)
     ))
     return;
   P1e(P4, addr).value = 0;
+
+  union PTE *pt;
+
+  pt = PT(P2e(P4, addr).value);
+  for(int i = 0; i < ENTRIES_PER_PT; i++)
+    if(pt[i].value)
+      return;
+  P2e(P4, addr).value = 0;
+
+  pt = PT(P3e(P4, addr).value);
+  for(int i = 0; i < ENTRIES_PER_PT; i++)
+    if(pt[i].value)
+      return;
+  P3e(P4, addr).value = 0;
+
+  pt = PT(P4e(P4, addr).value);
+  for(int i = 0; i < ENTRIES_PER_PT; i++)
+    if(pt[i].value)
+      return;
+  P4e(P4, addr).value = 0;
 }
