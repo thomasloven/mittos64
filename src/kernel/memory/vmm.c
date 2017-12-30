@@ -91,17 +91,20 @@ void free_page(void *P4, uintptr_t addr, int free)
   for(int i = 0; i < ENTRIES_PER_PT; i++)
     if(pt[i].value)
       return;
+  pmm_free(MASK_FLAGS(P2e(P4, addr).value));
   P2e(P4, addr).value = 0;
 
   pt = PT(P3e(P4, addr).value);
   for(int i = 0; i < ENTRIES_PER_PT; i++)
     if(pt[i].value)
       return;
+  pmm_free(MASK_FLAGS(P3e(P4, addr).value));
   P3e(P4, addr).value = 0;
 
   pt = PT(P4e(P4, addr).value);
   for(int i = 0; i < ENTRIES_PER_PT; i++)
     if(pt[i].value)
       return;
+  pmm_free(MASK_FLAGS(P4e(P4, addr).value));
   P4e(P4, addr).value = 0;
 }
