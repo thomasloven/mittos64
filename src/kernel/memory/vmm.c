@@ -25,13 +25,20 @@ union PTE {
 #define P2e(pt, addr) PT(P3e(pt, addr).value)[P2_OFFSET(addr)]
 #define P1e(pt, addr) PT(P2e(pt, addr).value)[P1_OFFSET(addr)]
 
-uintptr_t vmm_get_page(void *P4, uintptr_t addr)
+int page_exists(void *P4, uintptr_t addr)
 {
   if(P4
       && P4e(P4, addr).present
       && P3e(P4, addr).present
       && P2e(P4, addr).present
     )
+    return 1;
+  return 0;
+}
+
+uintptr_t vmm_get_page(void *P4, uintptr_t addr)
+{
+  if(page_exists(P4, addr))
     return P1e(P4, addr).value;
   else
     return -1;
@@ -39,11 +46,7 @@ uintptr_t vmm_get_page(void *P4, uintptr_t addr)
 
 int vmm_set_page(void *P4, uintptr_t addr, uintptr_t page, uint16_t flags)
 {
-  if(!(P4
-      && P4e(P4, addr).present
-      && P3e(P4, addr).present
-      && P2e(P4, addr).present
-    ))
+  if(!page_exists(P4, addr))
     return -1;
 
   P1e(P4, addr).value = page | flags;
@@ -75,11 +78,7 @@ int touch_page(void *P4, uintptr_t addr, uint16_t flags)
 void free_page(void *P4, uintptr_t addr, int free)
 {
   (void)free;
-  if(!(P4
-      && P4e(P4, addr).present
-      && P3e(P4, addr).present
-      && P2e(P4, addr).present
-    ))
+  if(!page_exists(P4, addr))
     return;
   P1e(P4, addr).value = 0;
 
