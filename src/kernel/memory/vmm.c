@@ -39,7 +39,10 @@ int page_exists(void *P4, uintptr_t addr)
 uintptr_t vmm_get_page(void *P4, uintptr_t addr)
 {
   if(page_exists(P4, addr))
-    return P1e(P4, addr).value;
+    if(P2e(P4, addr).huge)
+      return P2e(P4, addr).value;
+    else
+      return P1e(P4, addr).value;
   else
     return -1;
 }

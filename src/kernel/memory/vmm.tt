@@ -62,6 +62,15 @@ TEST(get_page_fails_if_PTE_not_present)
 
   ASSERT_EQ_PTR(ret, -1);
 }
+TEST(get_page_gets_2mb_pages)
+{
+  p4[1] = (uintptr_t)p3; p4[1] |= PAGE_PRESENT;
+  p3[2] = (uintptr_t)p2; p3[2] |= PAGE_PRESENT;
+  p2[3] = 0x1234567890A00000 | PAGE_HUGE | PAGE_PRESENT;
+
+  uintptr_t ret = vmm_get_page(p4, ADDR1234);
+  ASSERT_EQ_PTR(ret, 0x1234567890A00000 | PAGE_HUGE | PAGE_PRESENT);
+}
 
 TEST(set_page_sets_page)
 {
