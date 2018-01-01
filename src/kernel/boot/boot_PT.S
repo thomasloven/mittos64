@@ -10,7 +10,12 @@ BootP4:
     .quad 0
   .endr
 BootP3:
-  .quad 0 + (PAGE_PRESENT | PAGE_WRITE | PAGE_HUGE)
+  .quad offset BootP2 + (PAGE_PRESENT | PAGE_WRITE)
+  .rept ENTRIES_PER_PT - 1
+    .quad 0
+  .endr
+BootP2:
+  .quad (PAGE_PRESENT | PAGE_WRITE | PAGE_HUGE)
   .rept ENTRIES_PER_PT - 1
     .quad 0
   .endr
