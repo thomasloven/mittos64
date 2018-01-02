@@ -56,6 +56,8 @@ int vmm_set_page(void *P4, uintptr_t addr, uintptr_t page, uint16_t flags)
           && P3e(P4, addr).present
         ))
       return -1;
+    if(P2e(P4, addr).present && !P2e(P4,addr).huge)
+      return -1;
     P2e(P4, addr).value = page | flags;
     return 0;
   }

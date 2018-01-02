@@ -106,6 +106,14 @@ TEST(set_page_sets_2mb_pages)
 
   ASSERT_EQ_PTR(p2[3], 0x1234567890A00000 | PAGE_HUGE | PAGE_PRESENT);
 }
+TEST(set_page_does_not_overwrite_4kb_pages_with_2mb)
+{
+  BUILD_PT(0,0,0);
+
+  int retval = vmm_set_page(p4, 0, 0, PAGE_HUGE | PAGE_PRESENT);
+
+  ASSERT_NEQ_INT(retval, 0);
+}
 
 uintptr_t pmm_alloc()
 {
