@@ -49,6 +49,17 @@ uintptr_t vmm_get_page(void *P4, uintptr_t addr)
 
 int vmm_set_page(void *P4, uintptr_t addr, uintptr_t page, uint16_t flags)
 {
+  if(flags & PAGE_HUGE)
+  {
+    if(!(P4
+          && P4e(P4, addr).present
+          && P3e(P4, addr).present
+        ))
+      return -1;
+    P2e(P4, addr).value = page | flags;
+    return 0;
+  }
+
   if(!page_exists(P4, addr))
     return -1;
 

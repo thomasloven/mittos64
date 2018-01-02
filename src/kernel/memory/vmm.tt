@@ -97,6 +97,15 @@ TEST(set_page_fails_if_PT_missing)
 
   ASSERT_NEQ_INT(retval, 0);
 }
+TEST(set_page_sets_2mb_pages)
+{
+  p4[1] = (uintptr_t)p3; p4[1] |= PAGE_PRESENT;
+  p3[2] = (uintptr_t)p2; p3[2] |= PAGE_PRESENT;
+
+  vmm_set_page(p4, (1UL<<39)+(2UL<<30)+(3UL<<21), 0x1234567890A00000, PAGE_HUGE | PAGE_PRESENT);
+
+  ASSERT_EQ_PTR(p2[3], 0x1234567890A00000 | PAGE_HUGE | PAGE_PRESENT);
+}
 
 uintptr_t pmm_alloc()
 {
