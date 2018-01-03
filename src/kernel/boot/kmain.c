@@ -30,8 +30,8 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
         continue;
       if(vmm_get_page(&BootP4, (uintptr_t)P2V(p)) == (uintptr_t)-1)
       {
-        touch_page(&BootP4, (uintptr_t)P2V(p), PAGE_WRITE | PAGE_HUGE);
-        vmm_set_page(&BootP4, (uintptr_t)P2V(p), p, PAGE_HUGE | PAGE_WRITE | PAGE_PRESENT);
+        touch_page(&BootP4, (uintptr_t)P2V(p), PAGE_GLOBAL | PAGE_WRITE | PAGE_HUGE);
+        vmm_set_page(&BootP4, (uintptr_t)P2V(p), p, PAGE_GLOBAL | PAGE_HUGE | PAGE_WRITE | PAGE_PRESENT);
       }
       if(type == 1)
         pmm_free(p);
