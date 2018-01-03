@@ -143,15 +143,20 @@ TEST(touch_page_adds_P1)
 }
 TEST(touch_page_sets_flags)
 {
-  touch_page(p4, 0, 0x123);
+  touch_page(p4, 0, PAGE_WRITE);
 
-  ASSERT_EQ_PTR(p2[0], (uintptr_t)p1 | 0x123 | PAGE_PRESENT);
+  ASSERT_EQ_PTR(p2[0], (uintptr_t)p1 | PAGE_WRITE | PAGE_PRESENT);
 }
 TEST(touch_page_fails_if_out_of_pages)
 {
   pmm_alloc();
   int retval = touch_page(p4, 0, 0);
   ASSERT_NEQ_INT(retval, 0);
+}
+TEST(touch_page_stops_at_P2_for_huge_pages)
+{
+  touch_page(p4, 0, PAGE_HUGE);
+  ASSERT_EQ_PTR(p2[0], 0);
 }
 
 TEST(free_page_unsets_page)
