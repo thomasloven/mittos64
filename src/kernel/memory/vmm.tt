@@ -1,6 +1,10 @@
 // vim: ft=c
 #include <ttest.h>
 
+#include <memory.h>
+#undef P2V
+#define P2V(p) (p)
+
 #include "vmm.c"
 
 void *data;

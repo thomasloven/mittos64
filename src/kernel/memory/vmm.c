@@ -19,7 +19,7 @@ union PTE {
   };
 };
 
-#define PT(ptr) ((union PTE *)MASK_FLAGS(ptr))
+#define PT(ptr) ((union PTE *)P2V(MASK_FLAGS(ptr)))
 #define P4e(pt, addr) (PT(pt)[P4_OFFSET(addr)])
 #define P3e(pt, addr) PT(P4e(pt, addr).value)[P3_OFFSET(addr)]
 #define P2e(pt, addr) PT(P3e(pt, addr).value)[P2_OFFSET(addr)]
