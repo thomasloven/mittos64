@@ -33,4 +33,9 @@ size_t strlen(const char *s);
 
 void pmm_free(uintptr_t page);
 uintptr_t pmm_alloc();
+
+uintptr_t vmm_get_page(void *P4, uintptr_t addr);
+int vmm_set_page(void *P4, uintptr_t addr, uintptr_t page, uint16_t flags);
+int touch_page(void *P4, uintptr_t addr, uint16_t flags);
+void free_page(void *P4, uintptr_t addr, int free);
 #endif
