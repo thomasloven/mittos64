@@ -98,21 +98,28 @@ int touch_page(void *P4, uintptr_t addr, uint16_t flags)
 
 void free_page(void *P4, uintptr_t addr, int free)
 {
-  (void)free;
   if(!page_exists(P4, addr))
     return;
-  P1e(P4, addr).value = 0;
-
-  if(!free) return;
 
   union PTE *pt;
 
-  pt = PT(P2e(P4, addr).value);
-  for(int i = 0; i < ENTRIES_PER_PT; i++)
-    if(pt[i].value)
-      return;
-  pmm_free(MASK_FLAGS(P2e(P4, addr).value));
-  P2e(P4, addr).value = 0;
+  if(P2e(P4, addr).huge)
+  {
+    P2e(P4, addr).value = 0;
+
+    if(!free) return;
+  } else {
+    P1e(P4, addr).value = 0;
+
+    if(!free) return;
+
+    pt = PT(P2e(P4, addr).value);
+    for(int i = 0; i < ENTRIES_PER_PT; i++)
+      if(pt[i].value)
+        return;
+    pmm_free(MASK_FLAGS(P2e(P4, addr).value));
+    P2e(P4, addr).value = 0;
+  }
 
   pt = PT(P3e(P4, addr).value);
   for(int i = 0; i < ENTRIES_PER_PT; i++)
