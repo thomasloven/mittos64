@@ -16,3 +16,10 @@ uintptr_t pmm_alloc()
   page = (uintptr_t)(page?V2P(page):0);
   return page;
 }
+
+uintptr_t pmm_calloc()
+{
+  uintptr_t page = pmm_alloc();
+  memset(P2V(page), 0, 0x1000);
+  return page;
+}

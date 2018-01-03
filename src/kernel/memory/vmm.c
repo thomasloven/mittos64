@@ -77,19 +77,19 @@ int touch_page(void *P4, uintptr_t addr, uint16_t flags)
   flags ^= PAGE_HUGE*huge;
 
   if((!P4e(P4, addr).present)
-      && (!(P4e(P4, addr).value = pmm_alloc())))
+      && (!(P4e(P4, addr).value = pmm_calloc())))
     return -1;
   P4e(P4, addr).value |= flags | PAGE_PRESENT;
 
   if((!P3e(P4, addr).present)
-      && (!(P3e(P4, addr).value = pmm_alloc())))
+      && (!(P3e(P4, addr).value = pmm_calloc())))
     return -1;
   P3e(P4, addr).value |= flags | PAGE_PRESENT;
 
   if(huge) return 0;
 
   if((!P2e(P4, addr).present)
-      && (!(P2e(P4, addr).value = pmm_alloc())))
+      && (!(P2e(P4, addr).value = pmm_calloc())))
     return -1;
   P2e(P4, addr).value |= flags | PAGE_PRESENT;
 
