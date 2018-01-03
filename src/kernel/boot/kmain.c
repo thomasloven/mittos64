@@ -23,19 +23,18 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
   uint32_t type, i=0;
   while(!multiboot_get_memory_area(i++, &start, &end, &type))
   {
-    if(type != 1)
-      continue;
-    debug_printf("Mem %d 0x%x-0x%x\n", type, start, end);
+    debug("Mem %d 0x%x-0x%x\n", type, start, end);
     for(uintptr_t p = start; p < end; p += PAGE_SIZE)
     {
       if(p >= V2P(&kernel_start) && p < V2P(&kernel_end))
         continue;
-      if(!(p & 0x1FFFFF))
+      if(vmm_get_page(&BootP4, (uintptr_t)P2V(p)) == (uintptr_t)-1)
       {
-        touch_page(&BootP4, (uintptr_t)P2V(p), PAGE_HUGE);
+        touch_page(&BootP4, (uintptr_t)P2V(p), PAGE_WRITE | PAGE_HUGE);
         vmm_set_page(&BootP4, (uintptr_t)P2V(p), p, PAGE_HUGE | PAGE_WRITE | PAGE_PRESENT);
       }
-      pmm_free(p);
+      if(type == 1)
+        pmm_free(p);
     }
   }
 
