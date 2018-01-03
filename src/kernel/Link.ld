@@ -6,6 +6,7 @@ KERNEL_START = 0x10000;
 SECTIONS
 {
   . = KERNEL_START + KERNEL_OFFSET;
+  kernel_start = .;
   .text : AT(ADDR(.text) - KERNEL_OFFSET)
   {
     *(.multiboot)
@@ -24,4 +25,5 @@ SECTIONS
     *(.COMMON)
     *(.bss)
   }
+  kernel_end = .;
 }
