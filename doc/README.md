@@ -11,4 +11,5 @@
 [Chapter 6: Debug output](6_Debug_Output.md)<br>
 [Chapter 7: Multiboot Data](7_Multiboot_Data.md)<br>
 [Chapter 8: Exceptions and Interrupts](8_Exceptions.md)<br>
+[Chapter 9: Memory Management](9_Memory_Management.md)<br>
 
