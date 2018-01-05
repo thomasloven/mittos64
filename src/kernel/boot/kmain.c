@@ -5,6 +5,19 @@
 #include <multiboot.h>
 #include <cpu.h>
 #include <interrupts.h>
+#include <thread.h>
+
+void thread_function()
+{
+  int tid = get_tid();
+
+  while(1)
+  {
+    debug("Thread %d\n", tid);
+    yield();
+  }
+}
+
 
 void kmain(uint64_t multiboot_magic, void *multiboot_data)
 {
@@ -22,6 +35,11 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
 
 
   debug_ok("Boot \"Complete\"\n");
+
+  new_thread(thread_function);
+  new_thread(thread_function);
+  new_thread(thread_function);
+  yield();
 
   PANIC("Reached end of kernel main function\n");
   for(;;);
