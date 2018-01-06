@@ -9,19 +9,9 @@ main()
     local files=`find $dir -name "*.tt"`
     for suite in $files; do
 
-      cp $suite $suite.c
-      local tests=`sed -n -e 's/^\s*TEST(\([^,]*\)).*$/ttt_\1/p' $suite`
-
-      echo "tt_test tt_tests[] = {" >> $suite.c
-      for t in $tests; do echo "$t," >> $suite.c; done
-      echo "0};" >> $suite.c
-
-      echo "char *tt_test_names[] = {" >> $suite.c
-      for t in $tests; do echo "\"$t\"," >> $suite.c; done
-      echo "\"\"};" >> $suite.c
 
       test_exec=`mktemp /tmp/tmp.XXXXXX`
-      compiler_output=`cc $suite.c -o $test_exec -ggdb -I $dir/include -I toolchain -DTTEST 2>&1`
+      compiler_output=`cc -x c $suite -o $test_exec -ggdb -I $dir/include -I toolchain -DTTEST 2>&1`
       compiler_status=$?
 
       echo -e "\x1b[35m$suite\x1b[0m"
@@ -32,7 +22,7 @@ main()
         echo -e "\x1b[31mCOMPILATION OF SUITE FAILED\x1b[0m"
         echo "$compiler_output" | sed -e 's/\.tt\.c:/\.tt:/'
       fi
-        rm -f $suite.c $test_exec
+        rm -f $test_exec
     done
   done
 

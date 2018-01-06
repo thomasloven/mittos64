@@ -4,19 +4,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef int (*tt_test)(void);
 
 char *tt_filename;
 char *tt_current_test;
 int tt_fd[2];
 int tt_color = 1;
 
-extern tt_test tt_tests[];
-extern char *tt_test_names[];
 
 #ifndef TT_BUFFER_SIZE
   #define TT_BUFFER_SIZE 512
 #endif
+
 
 #define TT_CLR_RED ((tt_color)?"\x1b[31m":"")
 #define TT_CLR_GRN ((tt_color)?"\x1b[32m":"")
@@ -24,6 +22,7 @@ extern char *tt_test_names[];
 #define TT_CLR_RES ((tt_color)?"\x1b[0m":"")
 
 #define TT_FAIL(error, ...) dprintf(tt_fd[1], "\"%s\" Line %d: %s >> " error "\n", tt_filename, __LINE__, tt_current_test, __VA_ARGS__);
+
 
 #define ASSERT_EQUAL(type, pf, lhs, rhs) do { \
   type tt_lhs = (type)(lhs); \
@@ -70,10 +69,35 @@ extern char *tt_test_names[];
 #define ASSERT_NEQ_CHR(lhs, rhs) ASSERT_NOT_EQUAL(char, "c", lhs, rhs)
 #define ASSERT_EQ_STR(lhs, rhs, n) ASSERT_STRN(lhs, rhs, n)
 
-#define TEST(name) int ttt_##name()
+typedef int (*tt_test)(void);
+
+struct tt_test
+{
+  char *name;
+  int (*test)(void);
+};
+struct tt_test *tt_tests;
+
+int tt_test_count = 0;
+
+#define TEST(name) \
+  int ttt_##name(); \
+  __attribute__((constructor)) void tttr_##name() { \
+    tt_register(#name, ttt_##name); \
+  } \
+    int ttt_##name()
 
 #define BEFORE() void tt_before()
 #define AFTER() void tt_after()
+
+void tt_register(char *name, int (*fn)(void))
+{
+  tt_tests = realloc(tt_tests, (tt_test_count+1)*sizeof(struct tt_test));
+  tt_tests[tt_test_count].name = name;
+  tt_tests[tt_test_count].test = fn;
+  tt_test_count++;
+
+}
 
 void __attribute__((weak)) tt_before(void);
 void __attribute__((weak)) tt_after(void);
@@ -89,17 +113,18 @@ int main(int argc, char **argv)
 
   int failures = 0;
   int i = 0;
-  while(tt_tests[i])
+  while(i < tt_test_count)
   {
+    struct tt_test *test = &tt_tests[i];
     fflush(stdout);
     pipe(tt_fd);
     int pid;
+    tt_current_test = test->name;
     if(!(pid = fork()))
     {
       close(tt_fd[0]);
-      tt_current_test = tt_test_names[i];
       if(tt_before) tt_before();
-      int result = tt_tests[i]();
+      int result = test->test();
       if(tt_after) tt_after();
       exit(result);
     }
@@ -116,7 +141,7 @@ int main(int argc, char **argv)
     if(!WIFEXITED(status))
     {
       failed = 1;
-      sprintf(buffer, "\"%s\" >> TEST %d CRASHED\n", tt_filename, i+1);
+      sprintf(buffer, "\"%s\" >> TEST %s CRASHED\n", tt_filename, tt_current_test);
     }
     if(failed)
     {
