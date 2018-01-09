@@ -9,16 +9,15 @@ main()
     local files=`find $dir -name "*.tt"`
     for suite in $files; do
 
-
-      test_exec=`mktemp /tmp/tmp.XXXXXX`
-      compiler_output=`cc -x c $suite -o $test_exec -ggdb -I $dir/include -I toolchain -DTTEST 2>&1`
+      test_exec="${suite}est"
+      compiler_output=`cc -x c $suite -o $test_exec -I $dir/include -I toolchain -DTTEST 2>&1`
       compiler_status=$?
 
-      echo -e "\x1b[35m$suite\x1b[0m"
       if [[ "$compiler_status" -eq "0" ]]; then
-        $test_exec $suite || failures=$(($failures + 1))
+        $test_exec $@ || failures=$(($failures + 1))
       else
         failures=$(($failures + 1))
+        echo
         echo -e "\x1b[31mCOMPILATION OF SUITE FAILED\x1b[0m"
         echo "$compiler_output" | sed -e 's/\.tt\.c:/\.tt:/'
       fi
@@ -26,6 +25,7 @@ main()
     done
   done
 
+  echo
   exit $failures
 
 }

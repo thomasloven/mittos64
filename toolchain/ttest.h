@@ -5,40 +5,27 @@
 #include <string.h>
 
 
-char *tt_filename;
-char *tt_current_test;
-int tt_fd[2];
-int tt_color = 1;
-
-
-#ifndef TT_BUFFER_SIZE
-  #define TT_BUFFER_SIZE 512
-#endif
-
-
-#define TT_CLR_RED ((tt_color)?"\x1b[31m":"")
-#define TT_CLR_GRN ((tt_color)?"\x1b[32m":"")
-#define TT_CLR_BLU ((tt_color)?"\x1b[34m":"")
-#define TT_CLR_RES ((tt_color)?"\x1b[0m":"")
-
-#define TT_FAIL(error, ...) dprintf(tt_fd[1], "\"%s\" Line %d: %s >> " error "\n", tt_filename, __LINE__, tt_current_test, __VA_ARGS__);
+#define TT_FAIL(error, ...) dprintf(tt_pipe[1], "\"%s\" Line %d: %s >> " error "\n", tt_current->filename, __LINE__, tt_current->name, __VA_ARGS__);
 
 
 #define ASSERT_EQUAL(type, pf, lhs, rhs) do { \
   type tt_lhs = (type)(lhs); \
   type tt_rhs = (type)(rhs); \
   if(tt_lhs != tt_rhs) { \
-  TT_FAIL("Expected <%" pf "> got <%" pf ">", tt_rhs, tt_lhs); \
-  return 1; \
+    TT_FAIL("Expected <%" pf "> got <%" pf ">", tt_rhs, tt_lhs); \
+    return 1; \
   } \
+  return 0; \
 }while(0);
+
 #define ASSERT_NOT_EQUAL(type, pf, lhs, rhs) do { \
   type tt_lhs = (type)(lhs); \
   type tt_rhs = (type)(rhs); \
   if(tt_lhs == tt_rhs) { \
-  TT_FAIL("Got <%" pf "> but expected anything else", tt_rhs); \
-  return 1; \
+    TT_FAIL("Got <%" pf "> but expected anything else", tt_rhs); \
+    return 1; \
   } \
+  return 0; \
 }while(0);
 
 #define ASSERT_STRN(lhs, rhs, n) do { \
@@ -56,11 +43,12 @@ int tt_color = 1;
   memcpy(tt_rhs_c, tt_rhs, tt_n); \
   tt_rhs_c[tt_n] = tt_lhs_c[tt_n] = '\0'; \
   if(strncmp(tt_lhs_c, tt_rhs_c, tt_n)) { \
-  TT_FAIL("Expected <%s> got <%s>", tt_rhs_c, tt_lhs_c); \
-  free(tt_lhs_c); free(tt_rhs_c); \
-  return 1; \
+    TT_FAIL("Expected <%s> got <%s>", tt_rhs_c, tt_lhs_c); \
+    free(tt_lhs_c); free(tt_rhs_c); \
+    return 1; \
   } \
   free(tt_lhs_c); free(tt_rhs_c); \
+  return 0; \
 }while(0);
 
 #define ASSERT_EQ_INT(lhs, rhs) ASSERT_EQUAL(int, "d", lhs, rhs)
@@ -69,112 +57,184 @@ int tt_color = 1;
 #define ASSERT_NEQ_CHR(lhs, rhs) ASSERT_NOT_EQUAL(char, "c", lhs, rhs)
 #define ASSERT_EQ_STR(lhs, rhs, n) ASSERT_STRN(lhs, rhs, n)
 
-typedef int (*tt_test)(void);
-
-struct tt_test
-{
-  char *name;
-  int (*test)(void);
-};
-struct tt_test *tt_tests;
-
-int tt_test_count = 0;
-
 #define TEST(name) \
   int ttt_##name(); \
   __attribute__((constructor)) void tttr_##name() { \
-    tt_register(#name, ttt_##name); \
+    tt_register(#name, ttt_##name, __FILE__); \
   } \
     int ttt_##name()
 
 #define BEFORE() void tt_before()
 #define AFTER() void tt_after()
 
-void tt_register(char *name, int (*fn)(void))
-{
-  tt_tests = realloc(tt_tests, (tt_test_count+1)*sizeof(struct tt_test));
-  tt_tests[tt_test_count].name = name;
-  tt_tests[tt_test_count].test = fn;
-  tt_test_count++;
-
-}
-
 void __attribute__((weak)) tt_before(void);
 void __attribute__((weak)) tt_after(void);
 
+#ifndef TT_BUFFER_SIZE
+  #define TT_BUFFER_SIZE 512
+#endif
+
+struct tt_test
+{
+  char *filename;
+  char *name;
+  int (*test)(void);
+  int status;
+  char *output;
+};
+
+// Global variables
+int tt_pipe[2];
+int tt_color = 1;
+int tt_verbose = 0;
+int tt_silent = 0;
+struct tt_test *tt_tests;
+struct tt_test *tt_current;
+int tt_max_name_len = 0;
+int tt_test_count = 0;
+
+void tt_register(char *name, int (*fn)(void), char *filename)
+{
+  tt_tests = realloc(tt_tests, (tt_test_count+1)*sizeof(struct tt_test));
+
+  struct tt_test *t = &tt_tests[tt_test_count++];
+  t->filename = filename;
+  t->name = name;
+  t->test = fn;
+  t->status = 1;
+  t->output = malloc(TT_BUFFER_SIZE);
+  if(strlen(name) > tt_max_name_len)
+    tt_max_name_len = strlen(name);
+}
+
+
+#define TT_CLR_RED ((tt_color)?"\x1b[31m":"")
+#define TT_CLR_GRN ((tt_color)?"\x1b[32m":"")
+#define TT_CLR_YEL ((tt_color)?"\x1b[33m":"")
+#define TT_CLR_RES ((tt_color)?"\x1b[0m":"")
+
 int main(int argc, char **argv)
 {
-  tt_filename = argv[1];
-
   if(!isatty(1)) tt_color = 0;
+  int opt;
+  while((opt = getopt(argc, argv, "vscn")) != -1)
+  {
+    switch(opt)
+    {
+      case 'v':
+        tt_verbose = 1;
+        tt_silent = 0;
+        break;
+      case 's':
+        tt_silent = 1;
+        tt_verbose = 0;
+        break;
+      case 'c':
+        tt_color = 1;
+        break;
+      case 'n':
+        tt_color = 0;
+        break;
+    }
+  }
 
-  char *buffer = malloc(TT_BUFFER_SIZE);
-  char **errors = 0;
+  int ok = 0;
+  int failed = 0;
+  int crashed = 0;
 
-  int failures = 0;
+  if(!tt_silent)
+    printf("\n%s\n", tt_tests[0].filename);
+
   int i = 0;
   while(i < tt_test_count)
   {
-    struct tt_test *test = &tt_tests[i];
+    tt_current = &tt_tests[i];
+
     fflush(stdout);
-    pipe(tt_fd);
+    pipe(tt_pipe);
+
     int pid;
-    tt_current_test = test->name;
     if(!(pid = fork()))
     {
-      close(tt_fd[0]);
+      // Run test
+      close(tt_pipe[0]);
       if(tt_before) tt_before();
-      int result = test->test();
+      int result = tt_current->test();
       if(tt_after) tt_after();
       exit(result);
     }
 
-    close(tt_fd[1]);
+    // Capture test output
+    close(tt_pipe[1]);
+    read(tt_pipe[0], tt_current->output, TT_BUFFER_SIZE);
+    close(tt_pipe[0]);
+
+    // Determine if test passed or not
     int status;
     waitpid(pid, &status, 0);
-    int failed = 0;
-    if(read(tt_fd[0], buffer, TT_BUFFER_SIZE))
-    {
-      failed = 1;
-    }
-    close(tt_fd[0]);
     if(!WIFEXITED(status))
     {
-      failed = 1;
-      sprintf(buffer, "\"%s\" >> TEST %s CRASHED\n", tt_filename, tt_current_test);
+      crashed++;
+      tt_current->status = -1;
+    } else if(WEXITSTATUS(status)) {
+      failed++;
+      tt_current->status = WEXITSTATUS(status);
+    } else {
+      ok++;
+      tt_current->status = 0;
     }
-    if(failed)
+
+    // Output progress
+    if(tt_verbose)
+      printf("%3d/%3d  %-*s ", i+1, tt_test_count,
+          tt_max_name_len, tt_current->name);
+    switch(tt_current->status)
     {
-      failures++;
-      errors = realloc(errors, failures*sizeof(char *));
-      errors[failures-1] = buffer;
-      buffer = malloc(TT_BUFFER_SIZE);
-      printf("%sF%s", TT_CLR_RED, TT_CLR_RES);
+      case 0:
+        if(tt_verbose)
+          printf("[%sOK%s]\n", TT_CLR_GRN, TT_CLR_RES);
+        else
+          printf("%s.%s", TT_CLR_GRN, TT_CLR_RES);
+        break;
+      case -1:
+        if(tt_verbose)
+          printf("[%sCRASHED%s]\n", TT_CLR_RED, TT_CLR_RES);
+        else
+          printf("%sC%s", TT_CLR_RED, TT_CLR_RES);
+        break;
+      default:
+        if(tt_verbose)
+          printf("[%sFAILED%s]\n", TT_CLR_YEL, TT_CLR_RES);
+        else
+          printf("%sF%s", TT_CLR_YEL, TT_CLR_RES);
     }
-    else
-    {
-      printf("%s.%s", TT_CLR_GRN, TT_CLR_RES);
-    }
+
     i++;
   }
 
-  printf("\n");
-  printf("Ran %d tests in %s\n", i, tt_filename);
-  free(buffer);
-  if(failures)
+  int retval = failed+crashed;
+
+  // Print summary
+  if(!tt_silent)
   {
-    printf("%sFAILED%s (failures=%d)\n", TT_CLR_RED, TT_CLR_RES, failures);
-    i = 0;
-    printf("%s========================================%s\n", TT_CLR_RED, TT_CLR_RES);
-    while(i < failures)
-    {
-      printf("%s", errors[i]);
-      free(errors[i]);
-      i++;
-    }
-    printf("%s========================================%s\n", TT_CLR_RED, TT_CLR_RES);
-  free(errors);
+    printf("\n%s", (retval)?TT_CLR_RED:TT_CLR_GRN);
+    printf("%d tests, %d failures", tt_test_count, retval);
+    printf("%s\n", TT_CLR_RES);
   }
 
-  return failures;
+  if(retval && tt_silent)
+    printf("\n");
+
+  // Print any errors
+  i = 0;
+  while(i < tt_test_count)
+  {
+    if(tt_tests[i].status)
+      printf("%s", tt_tests[i].output);
+    free(tt_tests[i].output);
+    i++;
+  }
+
+
+  return retval;
 }
