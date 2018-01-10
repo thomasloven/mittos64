@@ -1,14 +1,13 @@
 #include <thread.h>
-
-struct thread *threads[8];
-int current_tid = -1;
-int tid = 0;
+#include <scheduler.h>
 
 struct thread dummy;
+struct thread *current_thread = 0;
 
-struct thread *new_thread(void (*function)())
+uint64_t tid = 1;
+struct thread *new_thread(void (*function)(void))
 {
-  struct thread *th = threads[tid] = P2V(pmm_alloc());
+  struct thread *th = P2V(pmm_alloc());
 
   th->tcb.tid = tid++;
   th->RBP = (uint64_t)&th->RBP2;
@@ -20,22 +19,20 @@ struct thread *new_thread(void (*function)())
 
 void switch_thread(struct thread *old, struct thread *new)
 {
+  current_thread = new;
   swtch(&old->tcb.stack_ptr, &new->tcb.stack_ptr);
 }
 
 void yield()
 {
   struct thread *old, *new;
-  if(current_tid == -1)
-    old = &dummy;
+
+  old = current_thread;
+  if(old)
+    ready(old);
   else
-    old = threads[current_tid];
-
-  current_tid++;
-  if(current_tid == tid)
-    current_tid = 0;
-
-  new = threads[current_tid];
+    old = &dummy;
+  while(!(new = scheduler_next()));
 
   switch_thread(old, new);
 }

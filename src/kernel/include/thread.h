@@ -7,6 +7,7 @@ struct tcb
   uintptr_t stack_ptr;
   uint64_t tid;
   uint64_t state;
+  struct thread *next;
 };
 
 #define TCB_OFFSET (PAGE_SIZE - sizeof(struct tcb))
@@ -31,12 +32,10 @@ struct thread
   struct tcb tcb;
 };
 
-extern struct thread *threads[];
-int current_tid;
+struct thread *current_thread;
+#define CURRENT_THREAD() (current_thread)
 
-#define CURRENT_THREAD() (threads[current_tid])
-
-struct thread *new_thread(void (*function)());
+struct thread *new_thread(void (*function)(void));
 void yield();
 int get_tid();
 

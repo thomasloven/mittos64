@@ -6,6 +6,7 @@
 #include <cpu.h>
 #include <interrupts.h>
 #include <thread.h>
+#include <scheduler.h>
 
 void thread_function()
 {
@@ -36,9 +37,9 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
 
   debug_ok("Boot \"Complete\"\n");
 
-  new_thread(thread_function);
-  new_thread(thread_function);
-  new_thread(thread_function);
+  ready(new_thread(thread_function));
+  ready(new_thread(thread_function));
+  ready(new_thread(thread_function));
   yield();
 
   PANIC("Reached end of kernel main function\n");
