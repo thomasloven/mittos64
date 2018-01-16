@@ -10,11 +10,11 @@
 
 void thread_function()
 {
-  int tid = get_tid();
+  int thread_id = get_tid();
 
   while(1)
   {
-    debug("Thread %d\n", tid);
+    debug("Thread %d\n", thread_id);
     yield();
   }
 }
