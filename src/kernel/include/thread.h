@@ -2,7 +2,7 @@
 #include <memory.h>
 
 
-struct tcb
+struct thread
 {
   uintptr_t stack_ptr;
   uint64_t tid;
@@ -10,10 +10,10 @@ struct tcb
   struct thread *next;
 };
 
-#define TCB_OFFSET (PAGE_SIZE - sizeof(struct tcb))
+#define TCB_OFFSET (PAGE_SIZE - sizeof(struct thread))
 #define SWTCH_STACK_SIZE (0x8*8)
 
-struct thread
+struct thread_stack
 {
   uint8_t stack[TCB_OFFSET-SWTCH_STACK_SIZE];
   uint64_t RBP;
@@ -25,8 +25,10 @@ struct thread
   uint64_t RBP2;
   uint64_t ret;
 
-  struct tcb tcb;
+  struct thread tcb;
 }__attribute__((packed));
+
+#define thread_stack(th) (struct thread_stack *)((uintptr_t)th - TCB_OFFSET)
 
 struct thread *new_thread(void (*function)(void));
 void yield();

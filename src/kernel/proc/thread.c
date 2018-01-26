@@ -7,12 +7,13 @@ struct thread *_current_thread = 0;
 uint64_t next_tid = 1;
 struct thread *new_thread(void (*function)(void))
 {
-  struct thread *th = P2V(pmm_alloc());
+  struct thread_stack *stk = P2V(pmm_alloc());
+  struct thread *th = &stk->tcb;
 
-  th->tcb.tid = next_tid++;
-  th->RBP = (uint64_t)&th->RBP2;
-  th->ret = (uint64_t)function;
-  th->tcb.stack_ptr = (uint64_t)&th->RBP;
+  th->tid = next_tid++;
+  stk->RBP = (uint64_t)&stk->RBP2;
+  stk->ret = (uint64_t)function;
+  th->stack_ptr = (uint64_t)&stk->RBP;
 
   return th;
 }
@@ -30,7 +31,7 @@ void set_current_thread(struct thread *th)
 void switch_thread(struct thread *old, struct thread *new)
 {
   set_current_thread(new);
-  swtch(&old->tcb.stack_ptr, &new->tcb.stack_ptr);
+  swtch(&old->stack_ptr, &new->stack_ptr);
 }
 
 void yield()
@@ -49,5 +50,5 @@ void yield()
 
 int get_tid()
 {
-  return current_thread()->tcb.tid;
+  return current_thread()->tid;
 }

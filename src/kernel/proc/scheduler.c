@@ -9,10 +9,10 @@ void ready(struct thread *th)
 {
   if(!readyQ.last)
   {
-    th->tcb.next = 0;
+    th->next = 0;
     readyQ.first = readyQ.last = th;
   } else {
-    readyQ.last->tcb.next = th;
+    readyQ.last->next = th;
     readyQ.last = th;
   }
 }
@@ -20,7 +20,7 @@ void ready(struct thread *th)
 struct thread *scheduler_next()
 {
   struct thread *th = readyQ.first;
-  if(!(readyQ.first = th->tcb.next))
+  if(!(readyQ.first = th->next))
     readyQ.last = 0;
   return th;
 }
