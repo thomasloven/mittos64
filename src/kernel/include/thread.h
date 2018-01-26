@@ -28,10 +28,6 @@ struct thread
   struct tcb tcb;
 }__attribute__((packed));
 
-struct thread *current_thread;
-#define GET_CURRENT_THREAD() (current_thread)
-#define SET_CURRENT_THREAD(thread) current_thread = (thread)
-
 struct thread *new_thread(void (*function)(void));
 void yield();
 int get_tid();

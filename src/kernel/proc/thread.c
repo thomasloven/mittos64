@@ -2,7 +2,7 @@
 #include <scheduler.h>
 
 struct thread dummy;
-struct thread *current_thread = 0;
+struct thread *_current_thread = 0;
 
 uint64_t next_tid = 1;
 struct thread *new_thread(void (*function)(void))
@@ -17,9 +17,19 @@ struct thread *new_thread(void (*function)(void))
   return th;
 }
 
+struct thread *current_thread()
+{
+  return _current_thread;
+}
+
+void set_current_thread(struct thread *th)
+{
+  _current_thread = th;
+}
+
 void switch_thread(struct thread *old, struct thread *new)
 {
-  SET_CURRENT_THREAD(new);
+  set_current_thread(new);
   swtch(&old->tcb.stack_ptr, &new->tcb.stack_ptr);
 }
 
@@ -27,7 +37,7 @@ void yield()
 {
   struct thread *old, *new;
 
-  old = GET_CURRENT_THREAD();
+  old = current_thread();
   if(old)
     ready(old);
   else
@@ -39,5 +49,5 @@ void yield()
 
 int get_tid()
 {
-  return GET_CURRENT_THREAD()->tcb.tid;
+  return current_thread()->tcb.tid;
 }
