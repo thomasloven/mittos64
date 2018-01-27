@@ -1,13 +1,14 @@
 #pragma once
+#include <queue.h>
+#include <scheduler.h>
 #include <memory.h>
-
 
 struct thread
 {
   uintptr_t stack_ptr;
   uint64_t tid;
   uint64_t state;
-  struct thread *next;
+  QUEUE_SPOT(READYQ);
 };
 
 #define TCB_OFFSET (PAGE_SIZE - sizeof(struct thread))

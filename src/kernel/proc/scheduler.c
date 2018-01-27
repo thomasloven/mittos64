@@ -1,26 +1,17 @@
+#include <scheduler.h>
+#include <queue.h>
 #include <thread.h>
 
-struct {
-  struct thread *first;
-  struct thread *last;
-} readyQ = {0,0};
+QUEUE_HEAD_EMPTY(READYQ);
 
 void ready(struct thread *th)
 {
-  if(!readyQ.last)
-  {
-    th->next = 0;
-    readyQ.first = readyQ.last = th;
-  } else {
-    readyQ.last->next = th;
-    readyQ.last = th;
-  }
+  QUEUE_ADD(READYQ, th);
 }
 
 struct thread *scheduler_next()
 {
-  struct thread *th = readyQ.first;
-  if(!(readyQ.first = th->next))
-    readyQ.last = 0;
+  struct thread *th = QUEUE_PEEK(READYQ);
+  QUEUE_DROP(READYQ);
   return th;
 }
