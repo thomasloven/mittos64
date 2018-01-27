@@ -10,7 +10,7 @@
 
 void thread_function()
 {
-  int thread_id = get_tid();
+  int thread_id = current_thread()->tid;
 
   while(1)
   {

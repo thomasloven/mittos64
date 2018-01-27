@@ -32,6 +32,6 @@ struct thread_stack
 
 struct thread *new_thread(void (*function)(void));
 void yield();
-int get_tid();
+struct thread *current_thread();
 
-void swtch(void *, void *);
+void switch_stack(void *old_ptr, void *new_ptr);

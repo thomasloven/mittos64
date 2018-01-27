@@ -1,8 +1,8 @@
 .intel_syntax noprefix
 
-.global swtch
+.global switch_stack
 
-swtch:
+switch_stack:
   push rbp
   mov rbp, rsp
   push r15
