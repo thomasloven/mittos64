@@ -1,4 +1,4 @@
-#include <x86_64/memory.h>
+#include <memory.h>
 .intel_syntax noprefix
 
 .section .data

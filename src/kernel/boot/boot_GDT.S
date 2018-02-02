@@ -1,5 +1,5 @@
-#include <x86_64/gdt.h>
-#include <x86_64/memory.h>
+#include <gdt.h>
+#include <memory.h>
 .intel_syntax noprefix
 
 .section .rodata
