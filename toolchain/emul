@@ -6,4 +6,4 @@ iso=${BUILDROOT}mittos64.iso
 
 ${BUILDROOT}toolchain/mkiso
 
-qemu-system-x86_64 -s -S -cdrom ${iso} -curses
+qemu-system-x86_64 -s -S -cdrom ${iso} $@
