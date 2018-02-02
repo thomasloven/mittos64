@@ -7,6 +7,8 @@ iso=${BUILDROOT}mittos64.iso
 
 mkdir -p ${sysroot}
 
+# Grub configuration file
+# set to boot /kernel with minimal wait
 mkdir -p ${sysroot}/boot/grub
 cat > ${sysroot}/boot/grub/grub.cfg << EOF
 set timeout=1
