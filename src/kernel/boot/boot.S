@@ -5,7 +5,6 @@
 .align PAGE_SIZE
 .skip PAGE_SIZE
 BootStack:
-.byte 0
 
 .section .text
 
