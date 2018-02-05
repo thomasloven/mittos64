@@ -10,62 +10,12 @@ BootStack:
 .section .text
 
 .code32
-error:
-  //; Print "ERR!" in upper left corner
-  mov [0xb8000], dword ptr 0x4f004f00
-  mov [0xb8004], dword ptr 0x4f004f00
-  mov [0xb8000], byte ptr 'E'
-  mov [0xb8002], byte ptr 'R'
-  mov [0xb8004], byte ptr 'R'
-  mov [0xb8006], byte ptr '!'
-  jmp $
-
-check_cpuid:
-  //; Save EFLAGS
-  pushfd
-
-  //; Try to modify EFLAGS.ID
-  pushfd
-  xor dword ptr [esp], 1<<21
-  popfd
-
-  //;Read EFLAGS into eax
-  pushfd
-  pop eax
-
-  //; Restore original EFLAGS
-  popfd
-
-  //; Check if EFLAGS.ID was modified
-  xor eax, [esp+4]
-  and eax, 1<<21
-  jz error
-  ret
-
-check_longmode:
-  //; cpuid 0x8000 0000
-  mov eax, 0x80000000
-  cpuid
-  cmp eax, 0x80000001
-  jb error
-
-  //; cpuid 0x8000 0001
-  mov eax, 0x80000001
-  cpuid
-
-  //; Test for long mode flag
-  test edx, 1<<29
-  jz error
-  ret
-
 .global _start
 _start:
   cli
 
+  //; Set up a known stack
   mov esp, offset BootStack
-
-  call check_cpuid
-  call check_longmode
 
   //; Set CR4.PAE
   //; enabling Page Address Extension
