@@ -145,8 +145,7 @@ int main(int argc, char **argv)
   if(!tt_silent)
     printf("\n%s\n", tt_tests[0].filename);
 
-  int i = 0;
-  while(i < tt_test_count)
+  for(int i = 0; i < tt_test_count; i++)
   {
     tt_current = &tt_tests[i];
 
@@ -209,7 +208,6 @@ int main(int argc, char **argv)
           printf("%sF%s", TT_CLR_YEL, TT_CLR_RES);
     }
 
-    i++;
   }
 
   int retval = failed+crashed;
@@ -226,13 +224,11 @@ int main(int argc, char **argv)
     printf("\n");
 
   // Print any errors
-  i = 0;
-  while(i < tt_test_count)
+  for(int i = 0; i < tt_test_count; i++)
   {
     if(tt_tests[i].status)
       printf("%s", tt_tests[i].output);
     free(tt_tests[i].output);
-    i++;
   }
 
 
