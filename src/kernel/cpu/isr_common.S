@@ -1,10 +1,5 @@
 .intel_syntax noprefix
 
-.global load_idt
-load_idt:
-  lidt [rdi]
-  ret
-
 .extern int_handler
 .global isr_common
 .global isr_return

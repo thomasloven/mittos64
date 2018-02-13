@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <cpu.h>
 
 #define IDT_INTERRUPT 0xE
 #define IDT_DPL0 0x0
@@ -57,9 +58,9 @@ debug("RAX=%016x RBX=%016x RCX=%016x RDX=%016x\n", r->rax, r->rbx, r->rcx, r->rd
 debug("RSI=%016x RDI=%016x RBP=%016x RSP=%016x\n", r->rsi, r->rdi, r->rbp, r->rsp); \
 debug("R8 =%016x R9 =%016x R10=%016x R11=%016x\n", r->r8, r->r9, r->r10, r->r11); \
 debug("R12=%016x R13=%016x R14=%016x R15=%016x\n", r->r12, r->r13, r->r14, r->r15); \
-debug("RIP=%016x RFL=%016x\n", r->rip, r->rflags); \
-debug("CS=%016x SS=%016x\n", r->cs, r->ss);
+debug("RIP=%016x RFL=%08x\n", r->rip, r->rflags); \
+debug("CS=%016x SS=%016x\n", r->cs, r->ss); \
+debug("CR0=%08x CR2=%016x CR3=%016x CR4=%08x\n", read_cr0(), read_cr2(), read_cr3(), read_cr4());
 
-void load_idt(struct idtr *);
 
 void interrupt_init();

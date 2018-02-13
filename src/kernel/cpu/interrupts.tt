@@ -6,7 +6,7 @@
 #include "interrupts.c"
 
 uintptr_t isr_table[] ={};
-void load_idt(struct idtr *_)
+void load_idt(void *_)
 {
   (void)_;
 }
