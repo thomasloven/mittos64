@@ -3,7 +3,7 @@
 #include <debug.h>
 #undef debug
 #define debug(...)
-#include "idt.c"
+#include "interrupts.c"
 
 uintptr_t isr_table[] ={};
 void load_idt(struct idtr *_)

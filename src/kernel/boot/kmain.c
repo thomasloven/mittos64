@@ -3,7 +3,7 @@
 #include <vga.h>
 #include <debug.h>
 #include <multiboot.h>
-#include <interrupts.h>
+#include <cpu.h>
 
 void kmain(uint64_t multiboot_magic, void *multiboot_data)
 {
@@ -15,7 +15,7 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
 
   debug_info("Kernel was loaded with command line \"%s\", by <%s>\n", kernel_boot_data.commandline, kernel_boot_data.bootloader);
 
-  interrupt_init();
+  cpu_init();
 
   // Force a divide by zero exception
   // ISR 0
