@@ -20,7 +20,7 @@ int parse_multiboot2(struct mboot2_taglist *tags)
         kernel_boot_data.commandline = (char *)tag->data;
         break;
       default:
-        debug("[info] Unknown multiboot tag type:%d \n", tag->type);
+        debug_warning("Unknown multiboot tag type:%d \n", tag->type);
     }
     int padded_size = tag->size + ((tag->size % 8)?(8-(tag->size%8)):0);
     tag = incptr(tag, padded_size);
