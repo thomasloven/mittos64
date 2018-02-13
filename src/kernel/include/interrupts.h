@@ -63,4 +63,8 @@ debug("CS=%016x SS=%016x\n", r->cs, r->ss); \
 debug("CR0=%08x CR2=%016x CR3=%016x CR4=%08x\n", read_cr0(), read_cr2(), read_cr3(), read_cr4());
 
 
+typedef registers *(*int_handler_t)(registers *);
+
 void interrupt_init();
+int_handler_t bind_interrupt(uint32_t num, int_handler_t fn);
+void isr_return(registers *);

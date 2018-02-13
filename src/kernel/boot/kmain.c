@@ -4,6 +4,14 @@
 #include <debug.h>
 #include <multiboot.h>
 #include <cpu.h>
+#include <interrupts.h>
+
+registers *divbyzero(registers *r)
+{
+  debug_error("Divide by zero error!\n");
+  debug_print_registers(r);
+  for(;;);
+}
 
 void kmain(uint64_t multiboot_magic, void *multiboot_data)
 {
@@ -17,8 +25,10 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
 
   cpu_init();
 
-  // Force a divide by zero exception
+
+  // Force and catch a divide by zero exception
   // ISR 0
+  bind_interrupt(0, divbyzero);
   int a = 5, b = 0;
   int c = a/b;
 

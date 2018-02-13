@@ -5,8 +5,9 @@
 
 struct int_gate_descriptor idt[NUM_INTERRUPTS];
 struct idtr idtr;
-
 extern uintptr_t isr_table[];
+
+int_handler_t int_handlers[NUM_INTERRUPTS];
 
 void idt_set_gate(uint32_t num, uintptr_t vector, uint16_t cs, uint8_t ist, uint8_t flags)
 {
@@ -21,6 +22,7 @@ void idt_set_gate(uint32_t num, uintptr_t vector, uint16_t cs, uint8_t ist, uint
 void interrupt_init()
 {
   memset(idt, 0, sizeof(idt));
+  memset(int_handlers, 0, sizeof(int_handlers));
 
   for(int i=0; i < NUM_INTERRUPTS; i++)
   {
@@ -32,9 +34,18 @@ void interrupt_init()
   load_idt(&idtr);
 }
 
+int_handler_t bind_interrupt(uint32_t num, int_handler_t fn)
+{
+  int_handler_t old = int_handlers[num];
+  int_handlers[num] = fn;
+  return old;
+}
+
 registers *int_handler(registers *r)
 {
-  (void)r;
+  if(int_handlers[r->int_no])
+    return int_handlers[r->int_no](r);
+
   debug("Unhandled interrupt occurred\n");
   debug("Interrupt number: %d Error code: %d\n", r->int_no, r->err_code);
   debug_print_registers(r);
