@@ -1,0 +1,48 @@
+// vim: ft=c
+#include <ttest.h>
+
+
+TEST(two_equal_ints)
+{
+  ASSERT_EQ_INT(1, 1);
+}
+TEST(FAIL_two_equal_ints)
+{
+  ASSERT_EQ_INT(2, 3);
+}
+
+TEST(two_different_ints)
+{
+  ASSERT_NEQ_INT(2, 3);
+}
+TEST(FAIL_two_different_ints)
+{
+  ASSERT_NEQ_INT(1, 1);
+}
+
+TEST(two_equal_chars)
+{
+  ASSERT_EQ_CHR('a', 'a');
+}
+TEST(FAIL_two_equal_chars)
+{
+  ASSERT_EQ_CHR('b', 'c');
+}
+
+TEST(two_different_chars)
+{
+  ASSERT_NEQ_CHR('b', 'c');
+}
+TEST(FAIL_two_different_chars)
+{
+  ASSERT_NEQ_CHR('a', 'a');
+}
+
+TEST(two_equal_strings)
+{
+  ASSERT_EQ_STR("Hello", "Hello", 5);
+}
+TEST(FAIL_two_equal_strings)
+{
+  ASSERT_EQ_STR("Hello", "World", 5);
+}

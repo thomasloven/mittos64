@@ -5,7 +5,7 @@
 #include <string.h>
 
 
-#define TT_FAIL(error, ...) dprintf(tt_pipe[1], "\"%s\" Line %d: %s >> " error "\n", tt_current->filename, __LINE__, tt_current->name, __VA_ARGS__);
+#define TT_FAIL(error, ...) dprintf(tt_pipe[1], "\"%s\" Line %d: %s >> " error "\n", tt_current->filename, __LINE__, tt_current->name, ##__VA_ARGS__);
 
 
 #define ASSERT_EQUAL(type, pf, lhs, rhs) do { \
@@ -33,7 +33,7 @@
   char *tt_rhs = (char *)(rhs); \
   if(!tt_lhs || !tt_rhs) \
   { \
-    TT_FAIL("Expected string, got null pointer", 0); \
+    TT_FAIL("Expected string, got null pointer"); \
     return 1; \
   } \
   size_t tt_n = (size_t)(n); \
@@ -90,7 +90,7 @@ int tt_verbose = 0;
 int tt_silent = 0;
 struct tt_test *tt_tests;
 struct tt_test *tt_current;
-int tt_max_name_len = 0;
+unsigned int tt_max_name_len = 0;
 int tt_test_count = 0;
 
 void tt_register(char *name, int (*fn)(void), char *filename)
