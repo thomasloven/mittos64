@@ -1,6 +1,6 @@
 #!/bin/sh
 
-dirs="toolchain src/kernel"
+dirs="src/kernel"
 
 main()
 {
