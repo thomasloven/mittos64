@@ -1,29 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include <cpu.h>
-
-#define IDT_INTERRUPT 0xE
-#define IDT_DPL0 0x0
-#define IDT_PRESENT 0x80
-
-#define NUM_INTERRUPTS 256
-
-struct int_gate_descriptor
-{
-  uint16_t base_l;
-  uint16_t cs;
-  uint8_t ist;
-  uint8_t flags;
-  uint16_t base_m;
-  uint32_t base_h;
-  uint32_t ignored;
-} __attribute__((packed));
-
-struct idtr
-{
-  uint16_t len;
-  struct int_gate_descriptor *addr;
-} __attribute__((packed));
 
 typedef struct
 {

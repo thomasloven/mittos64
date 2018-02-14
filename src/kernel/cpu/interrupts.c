@@ -2,11 +2,32 @@
 #include <stdint.h>
 #include <memory.h>
 #include <debug.h>
+#include <cpu.h>
 
-struct int_gate_descriptor idt[NUM_INTERRUPTS];
-struct idtr idtr;
+#define IDT_INTERRUPT 0xE
+#define IDT_DPL0 0x0
+#define IDT_PRESENT 0x80
+
+#define NUM_INTERRUPTS 256
+
+struct idt
+{
+  uint16_t base_l;
+  uint16_t cs;
+  uint8_t ist;
+  uint8_t flags;
+  uint16_t base_m;
+  uint32_t base_h;
+  uint32_t ignored;
+} __attribute__((packed)) idt[NUM_INTERRUPTS];
+
+struct
+{
+  uint16_t len;
+  struct idt *addr;
+} __attribute__((packed)) idtr;
+
 extern uintptr_t isr_table[];
-
 int_handler_t int_handlers[NUM_INTERRUPTS];
 
 void idt_set_gate(uint32_t num, uintptr_t vector, uint16_t cs, uint8_t ist, uint8_t flags)
