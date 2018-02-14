@@ -3,6 +3,7 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 
 #define TT_FAIL(error, ...) dprintf(tt_pipe[1], "\"%s\" Line %d: %s >> " error "\n", tt_current->filename, __LINE__, tt_current->name, ##__VA_ARGS__);
@@ -56,6 +57,8 @@
 #define ASSERT_EQ_CHR(lhs, rhs) ASSERT_EQUAL(char, "c", lhs, rhs)
 #define ASSERT_NEQ_CHR(lhs, rhs) ASSERT_NOT_EQUAL(char, "c", lhs, rhs)
 #define ASSERT_EQ_STR(lhs, rhs, n) ASSERT_STRN(lhs, rhs, n)
+#define ASSERT_EQ_PTR(lhs, rhs) ASSERT_EQUAL(uintptr_t, PRIxPTR, lhs, rhs)
+#define ASSERT_NEQ_PTR(lhs, rhs) ASSERT_NOT_EQUAL(uintptr_t, PRIxPTR, lhs, rhs)
 
 #define TEST(name) \
   int ttt_##name(); \

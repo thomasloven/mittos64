@@ -46,3 +46,23 @@ TEST(FAIL_two_equal_strings)
 {
   ASSERT_EQ_STR("Hello", "World", 5);
 }
+
+int a, b;
+
+TEST(two_equal_pointers)
+{
+  ASSERT_EQ_PTR(&a, &a);
+}
+TEST(FAIL_two_equal_pointers)
+{
+  ASSERT_EQ_PTR(&a, &b);
+}
+
+TEST(two_different_pointers)
+{
+  ASSERT_NEQ_PTR(&a, &b);
+}
+TEST(FAIL_two_different_pointers)
+{
+  ASSERT_NEQ_PTR(&a, &a);
+}
