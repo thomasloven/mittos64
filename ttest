@@ -10,7 +10,7 @@ main()
     for suite in $files; do
 
       test_exec="${suite}est"
-      compiler_output=`cc -x c $suite -o $test_exec -Wall -Wextra -Werror -I $dir/include -I toolchain -DTTEST 2>&1`
+      compiler_output=`cc -x c $suite -o $test_exec -Wall -Wextra -Werror -I $dir/include -I toolchain -DNDEBUG -DTTEST 2>&1`
       compiler_status=$?
 
       if [[ "$compiler_status" -eq "0" ]]; then
