@@ -4,11 +4,25 @@
 
 #define MBOOT_REPLY 0x36D76289
 
+struct taglist{
+  uint32_t total_size;
+  uint32_t reserved;
+}__attribute__((packed));
+
+struct tag {
+  uint32_t type;
+  uint32_t size;
+  uint8_t data[];
+}__attribute__((packed));
+
+#define MBOOT2_COMMANDLINE 1
+#define MBOOT2_BOOTLOADER 2
+
 struct kernel_boot_data_st kernel_boot_data;
 
-int parse_multiboot2(struct mboot2_taglist *tags)
+int parse_multiboot2(struct taglist *tags)
 {
-  struct mboot2_tag *tag = incptr(tags, sizeof(struct mboot2_taglist));
+  struct tag *tag = incptr(tags, sizeof(struct taglist));
   while(tag->type)
   {
     switch(tag->type)

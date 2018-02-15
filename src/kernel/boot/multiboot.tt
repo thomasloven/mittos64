@@ -1,9 +1,6 @@
 // vim: ft=c
 #include <ttest.h>
 
-#include <debug.h>
-#undef debug
-#define debug(...)
 #include "multiboot.c"
 
 #include <string.h>
