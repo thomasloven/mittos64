@@ -43,4 +43,6 @@ void free_page(void *P4, uintptr_t addr, int free);
 
 extern union PTE BootP4;
 extern int kernel_start, kernel_end;
+
+void memory_init();
 #endif

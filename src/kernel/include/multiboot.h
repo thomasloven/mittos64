@@ -10,6 +10,8 @@ struct kernel_boot_data_st
   void *mmap;
 };
 
+#define MMAP_FREE 1
+
 extern struct kernel_boot_data_st kernel_boot_data;
 
 int multiboot_init(uint64_t magic, void *mboot_info);
