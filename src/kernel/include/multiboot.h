@@ -22,4 +22,4 @@ struct mboot2_tag {
 #define MBOOT2_COMMANDLINE 1
 #define MBOOT2_BOOTLOADER 2
 
-int parse_multiboot(uint64_t magic, void *mboot_info);
+int multiboot_init(uint64_t magic, void *mboot_info);

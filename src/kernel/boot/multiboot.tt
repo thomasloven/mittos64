@@ -2,11 +2,8 @@
 #include <ttest.h>
 
 #include <debug.h>
-#include <memory.h>
 #undef debug
 #define debug(...)
-#undef P2V
-#define P2V(addr) (void *)((uintptr_t)(addr))
 #include "multiboot.c"
 
 #include <string.h>
@@ -14,11 +11,24 @@
 
 #define MAGIC 0x36D76289
 
-struct mboot2_tag *generate_tag(uint32_t type, void *data, uint32_t data_size)
+struct tag_st
 {
-  struct mboot2_tag *tag = calloc(1, sizeof(struct mboot2_tag) + data_size);
+  uint32_t type;
+  uint32_t size;
+  uint8_t data[];
+}__attribute__((packed));
+struct header
+{
+  uint32_t size;
+  uint32_t _;
+}__attribute__((packed));
+
+
+struct tag_st *generate_tag(uint32_t type, void *data, uint32_t data_size)
+{
+  struct tag_st *tag = calloc(1, sizeof(struct tag_st) + data_size);
   tag->type = type;
-  tag->size = sizeof(struct mboot2_tag) + data_size;
+  tag->size = sizeof(struct tag_st) + data_size;
   if(data_size)
     memcpy(tag->data, data, data_size);
   return tag;
@@ -26,20 +36,20 @@ struct mboot2_tag *generate_tag(uint32_t type, void *data, uint32_t data_size)
 
 #define padded_size(tag) (tag->size + ((tag->size%8)?(8-(tag->size%8)):0))
 
-struct mboot2_taglist *generate_taglist(int num, ...)
+struct header *generate_taglist(int num, ...)
 {
   va_list args;
   va_start(args, num);
-  uint32_t total_size = sizeof(struct mboot2_taglist);
-  struct mboot2_tag **tags = calloc(num, sizeof(struct mboot2_tag *));
+  uint32_t total_size = sizeof(struct header);
+  struct tag_st **tags = calloc(num, sizeof(struct tag_st *));
   for(int i = 0; i < num; i++)
   {
-    tags[i] = va_arg(args, struct mboot2_tag *);
+    tags[i] = va_arg(args, struct tag_st *);
     total_size += padded_size(tags[i]);
   }
 
-  struct mboot2_taglist *taglist = calloc(1, total_size);
-  taglist->total_size = total_size;
+  struct header *taglist = calloc(1, total_size);
+  taglist->size = total_size;
 
   int pos = 8;
   uint8_t *p = (uint8_t *)taglist;
@@ -57,46 +67,46 @@ struct mboot2_taglist *generate_taglist(int num, ...)
 TEST(correctly_identifies_multiboot2_magic)
 {
   uint32_t tags[] = {16, 0, 0, 8};
-  parse_multiboot(MAGIC, tags);
+  multiboot_init(MAGIC, tags);
   ASSERT_EQ_INT(kernel_boot_data.multiboot_version, 2);
 }
 
 TEST(reads_boot_loader_name)
 {
   char *name = "ttest";
-  struct mboot2_taglist *tags = generate_taglist(2,
+  void *tags = generate_taglist(2,
     generate_tag(2, name, strlen(name) + 1),
     generate_tag(0,0,0));
 
-  parse_multiboot(MAGIC, tags);
+  multiboot_init(MAGIC, tags);
   ASSERT_EQ_STR(kernel_boot_data.bootloader, name, strlen(name));
   free(tags);
 }
 TEST(reads_kernel_commandline)
 {
   char *cmd = "mittos64-kern boot";
-  struct mboot2_taglist *tags = generate_taglist(2,
+  void *tags = generate_taglist(2,
     generate_tag(1, cmd, strlen(cmd) + 1),
     generate_tag(0,0,0));
 
-  parse_multiboot(MAGIC, tags);
+  multiboot_init(MAGIC, tags);
   ASSERT_EQ_STR(kernel_boot_data.commandline, cmd, strlen(cmd));
   free(tags);
 }
-// Here are four very simmilar tests
+// Here are four very similar tests
 // The difference is what values are checked and the order of the tags
 // Their existence is based on experience - helped me actually find a bug
 TEST(reads_multiple_tags_1)
 {
   char *cmd = "mittos64-kern boot";
   char *name = "ttest";
-  struct mboot2_taglist *tags = generate_taglist(3,
+  void *tags = generate_taglist(3,
     generate_tag(1, cmd, strlen(cmd) + 1),
     generate_tag(2, name, strlen(name) + 1),
     generate_tag(0,0,0)
   );
 
-  parse_multiboot(MAGIC, tags);
+  multiboot_init(MAGIC, tags);
   ASSERT_EQ_STR(kernel_boot_data.commandline, cmd, strlen(cmd));
   free(tags);
 }
@@ -104,13 +114,13 @@ TEST(reads_multiple_tags_2)
 {
   char *cmd = "mittos64-kern boot";
   char *name = "ttest";
-  struct mboot2_taglist *tags = generate_taglist(3,
+  void *tags = generate_taglist(3,
     generate_tag(1, cmd, strlen(cmd) + 1),
     generate_tag(2, name, strlen(name) + 1),
     generate_tag(0,0,0)
   );
 
-  parse_multiboot(MAGIC, tags);
+  multiboot_init(MAGIC, tags);
   ASSERT_EQ_STR(kernel_boot_data.bootloader, name, strlen(name));
   free(tags);
 }
@@ -118,13 +128,13 @@ TEST(reads_multiple_tags_3)
 {
   char *cmd = "mittos64-kern boot";
   char *name = "ttest";
-  struct mboot2_taglist *tags = generate_taglist(3,
+  void *tags = generate_taglist(3,
     generate_tag(2, name, strlen(name) + 1),
     generate_tag(1, cmd, strlen(cmd) + 1),
     generate_tag(0,0,0)
   );
 
-  parse_multiboot(MAGIC, tags);
+  multiboot_init(MAGIC, tags);
   ASSERT_EQ_STR(kernel_boot_data.commandline, cmd, strlen(cmd));
   free(tags);
 }
@@ -132,13 +142,13 @@ TEST(reads_multiple_tags_4)
 {
   char *cmd = "mittos64-kern boot";
   char *name = "ttest";
-  struct mboot2_taglist *tags = generate_taglist(3,
+  void *tags = generate_taglist(3,
     generate_tag(2, name, strlen(name) + 1),
     generate_tag(1, cmd, strlen(cmd) + 1),
     generate_tag(0,0,0)
   );
 
-  parse_multiboot(MAGIC, tags);
+  multiboot_init(MAGIC, tags);
   ASSERT_EQ_STR(kernel_boot_data.bootloader, name, strlen(name));
   free(tags);
 }

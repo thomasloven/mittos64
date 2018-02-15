@@ -28,7 +28,7 @@ int parse_multiboot2(struct mboot2_taglist *tags)
   return 0;
 }
 
-int parse_multiboot(uint64_t magic, void *mboot_info)
+int multiboot_init(uint64_t magic, void *mboot_info)
 {
   if(magic == MBOOT_REPLY)
   {
