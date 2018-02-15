@@ -1,0 +1,60 @@
+// vim: ft=c
+#include <ttest.h>
+
+#include "queue.h"
+
+#define TestQ test_queue, test_queue_next, struct item
+QUEUE_DECLARE(TestQ);
+QUEUE_DEFINE(TestQ);
+
+struct item
+{
+  int id;
+  QUEUE_SPOT(TestQ);
+};
+
+struct item item1 = {1, 0};
+struct item item2 = {2, 0};
+
+TEST(peek_returns_queued_item)
+{
+  queue_add(TestQ, &item1);
+  struct item *i = queue_peek(TestQ);
+  ASSERT_EQ_INT(i->id, 1);
+}
+TEST(peek_returns_first_queued_item)
+{
+  queue_add(TestQ, &item1);
+  queue_add(TestQ, &item2);
+  struct item *i = queue_peek(TestQ);
+  ASSERT_EQ_INT(i->id, 1);
+}
+TEST(peek_returns_zero_for_empty_queue)
+{
+  struct item *i = queue_peek(TestQ);
+  ASSERT_EQ_PTR(i, 0);
+}
+
+TEST(drop_drops_item_from_queue)
+{
+  queue_add(TestQ, &item1);
+  queue_add(TestQ, &item2);
+  queue_drop(TestQ);
+  struct item *i = queue_peek(TestQ);
+  ASSERT_EQ_INT(i->id, 2);
+}
+TEST(drop_empty_queue_does_not_crash)
+{
+  queue_drop(TestQ);
+  ASSERT_EQ_INT(!!queue_empty(TestQ), 1);
+}
+
+TEST(empty_reports_empty_queue_empty)
+{
+  ASSERT_EQ_INT(!!queue_empty(TestQ), 1);
+}
+TEST(empty_reports_nonempty_queue_not_empty)
+{
+  queue_add(TestQ, &item1);
+  ASSERT_EQ_INT(!!queue_empty(TestQ), 0);
+}

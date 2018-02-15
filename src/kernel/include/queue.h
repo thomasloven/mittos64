@@ -1,15 +1,28 @@
 #pragma once
 
+// This header file contains macros for making FIFO queues from structures
+// A queue is set up via a preprocessor definition
+// #define QueueName header_name, spot_name, struct type
+// where
+// QueueName is the queue identifying name
+// header_name is a unique name used for the queue head
+// spot_name is the name of the queue placeholder in the struct
+// struct type is the type of struct the queue is made from
+//
+// Each queue requires a declaration
+// QUEUE_DECLARE(QueueName);
+// and a definition
+// QUEUE_DEFINE(QueueName);
+
 #define _QUEUE_DECL(queue, entry, type) \
   struct queue{ \
     type *first; \
     type *last; \
-  }
-#define QUEUE_DECL(...) _QUEUE_DECL(__VA_ARGS__)
+  } queue
+#define QUEUE_DECLARE(...) _QUEUE_DECL(__VA_ARGS__)
 #define _QUEUE_HEAD(queue, entry, type) \
-  struct queue queue
-#define QUEUE_HEAD(...) _QUEUE_HEAD(__VA_ARGS__)
-#define QUEUE_HEAD_EMPTY(...) _QUEUE_HEAD(__VA_ARGS__) = {0,0}
+  struct queue queue = {0, 0}
+#define QUEUE_DEFINE(...) _QUEUE_HEAD(__VA_ARGS__)
 
 #define _QUEUE_SPOT(queue, entry, type) \
   type *entry
@@ -17,23 +30,23 @@
 
 #define _QUEUE_EMPTY(queue, entry, type) \
   (!(queue.last))
-#define QUEUE_EMPTY(...) _QUEUE_EMPTY(__VA_ARGS__)
-#define QUEUE_NOT_EMPTY(...) (!(_QUEUE_EMPTY(__VA_ARGS__)))
+#define queue_empty(...) _QUEUE_EMPTY(__VA_ARGS__)
+#define queue_not_empty(...) (!(_QUEUE_EMPTY(__VA_ARGS__)))
 
 #define _QUEUE_ADD(queue, entry, type, item) \
   if(!queue.last) \
-    queue.first = item; \
+    queue.first = (item); \
   else \
-    queue.last->entry = item; \
+    queue.last->entry = (item); \
   queue.last = item; \
-  item->entry = 0;
-#define QUEUE_ADD(...) _QUEUE_ADD(__VA_ARGS__)
+  (item)->entry = 0;
+#define queue_add(...) _QUEUE_ADD(__VA_ARGS__)
 
 #define _QUEUE_DROP(queue, entry, type) \
-    if(!(queue.first = queue.first->entry)) \
+    if(queue.first && !(queue.first = queue.first->entry)) \
       queue.last = 0;
-#define QUEUE_DROP(...) _QUEUE_DROP(__VA_ARGS__)
+#define queue_drop(...) _QUEUE_DROP(__VA_ARGS__)
 
 #define _QUEUE_PEEK(queue, entry, type) \
     (queue.first)
-#define QUEUE_PEEK(...) _QUEUE_PEEK(__VA_ARGS__)
+#define queue_peek(...) _QUEUE_PEEK(__VA_ARGS__)
