@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <cpu.h>
+#include <memory.h>
 
 #define GDT_CODE      (3<<11)
 #define GDT_DPL(lvl)  ((lvl)<<13)
@@ -26,3 +27,15 @@ struct gdt BootGDT[] = {
 };
 
 struct gdtp GDTp = {2*8-1, BootGDT};
+
+
+void gdt_init(uint64_t *_gdt)
+{
+  struct gdt *gdt = (struct gdt *)_gdt;
+  memcpy(gdt, BootGDT, sizeof(BootGDT));
+
+  GDTp.len = 2*8 - 1;
+  GDTp.gdt = gdt;
+
+  load_gdt(&GDTp);
+}

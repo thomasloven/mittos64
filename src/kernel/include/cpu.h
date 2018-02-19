@@ -4,7 +4,9 @@
 void cpu_init();
 
 
+
 void load_idt(void *);
+void load_gdt(void *);
 
 uint64_t read_cr0();
 uint64_t read_cr2();

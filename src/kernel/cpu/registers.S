@@ -5,6 +5,20 @@ load_idt:
   lidt [rdi]
   ret
 
+.global load_gdt
+load_gdt:
+  lgdt [rdi]
+  mov ax, 0x0
+  mov ss, ax
+  mov ds, ax
+  mov es, ax
+  movabs rax, offset .load_gdt
+  pushq 0x8
+  push rax
+  retfq
+.load_gdt:
+  ret
+
 .global read_cr0
 read_cr0:
   mov rax, cr0
