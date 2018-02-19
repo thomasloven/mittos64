@@ -8,7 +8,7 @@ struct thread
   uintptr_t stack_ptr;
   uint64_t tid;
   uint64_t state;
-  QUEUE_SPOT(READYQ);
+  QUEUE_SPOT(runQ);
 };
 
 

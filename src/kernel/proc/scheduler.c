@@ -2,16 +2,14 @@
 #include <queue.h>
 #include <thread.h>
 
-QUEUE_DEFINE(READYQ);
+QUEUE_DEFINE(runQ);
 
 void ready(struct thread *th)
 {
-  queue_add(READYQ, th);
+  queue_add(runQ, th);
 }
 
 struct thread *scheduler_next()
 {
-  struct thread *th = queue_peek(READYQ);
-  queue_drop(READYQ);
-  return th;
+  return queue_pop(runQ);
 }

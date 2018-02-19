@@ -50,3 +50,11 @@
 #define _QUEUE_PEEK(queue, entry, type) \
     (queue.first)
 #define queue_peek(...) _QUEUE_PEEK(__VA_ARGS__)
+
+#define _QUEUE_POP(queue, entry, type) \
+  __extension__({ \
+      type *_ret = _QUEUE_PEEK(queue, entry, type); \
+   _QUEUE_DROP(queue, entry, type); \
+   _ret; \
+   })
+#define queue_pop(...) _QUEUE_POP(__VA_ARGS__)

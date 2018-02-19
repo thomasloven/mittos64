@@ -1,8 +1,8 @@
 #pragma once
 #include <queue.h>
 
-#define READYQ readyQ, readyQ_next, struct thread
-QUEUE_DECLARE(READYQ);
+#define runQ readyQ, readyQ_next, struct thread
+QUEUE_DECLARE(runQ);
 
 void ready(struct thread *th);
 struct thread *scheduler_next();
