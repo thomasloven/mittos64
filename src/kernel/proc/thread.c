@@ -1,6 +1,7 @@
 #include <thread.h>
 #include <scheduler.h>
 #include <memory.h>
+#include <cpu.h>
 
 struct swtch_stack
 {
@@ -23,6 +24,7 @@ struct thread *new_thread(void (*function)(void))
   struct thread *th = P2V(pmm_calloc());
   th->tid = next_tid++;
   th->stack_ptr = incptr(th, PAGE_SIZE - sizeof(struct swtch_stack));
+  th->P4 = new_P4();
 
   struct swtch_stack *stk = th->stack_ptr;
   stk->RBP = (uint64_t)&stk->RBP2;
@@ -49,6 +51,7 @@ void scheduler()
     while(!(new = scheduler_next()));
 
     _thread = new;
+    write_cr3(new->P4);
     switch_stack(&sched_th->stack_ptr, &new->stack_ptr);
 
     ready(_thread);

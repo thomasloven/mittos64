@@ -8,6 +8,7 @@ struct thread
   uint64_t tid;
   void *stack_ptr;
   uint64_t state;
+  uint64_t P4;
   QUEUE_SPOT(runQ);
   uint8_t stack[];
 };
