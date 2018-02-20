@@ -8,9 +8,10 @@
 #include <thread.h>
 #include <scheduler.h>
 
+int thread_id;
 void thread_function()
 {
-  int thread_id = thread()->tid;
+  thread_id = thread()->tid;
 
   while(1)
   {
