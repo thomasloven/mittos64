@@ -3,9 +3,9 @@
 #include <scheduler.h>
 #include <stdint.h>
 
-struct thread
+struct process
 {
-  uint64_t tid;
+  uint64_t pid;
   void *stack_ptr;
   uint64_t state;
   uint64_t P4;
@@ -13,9 +13,9 @@ struct thread
   uint8_t stack[];
 };
 
-struct thread *thread();
+struct process *process();
 
-struct thread *new_thread(void (*function)(void));
+struct process *new_process(void (*function)(void));
 void yield();
 void start_scheduler();
 

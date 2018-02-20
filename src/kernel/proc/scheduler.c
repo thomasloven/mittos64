@@ -1,15 +1,15 @@
 #include <scheduler.h>
 #include <queue.h>
-#include <thread.h>
+#include <process.h>
 
 QUEUE_DEFINE(runQ);
 
-void ready(struct thread *th)
+void ready(struct process *proc)
 {
-  queue_add(runQ, th);
+  queue_add(runQ, proc);
 }
 
-struct thread *scheduler_next()
+struct process *scheduler_next()
 {
   return queue_pop(runQ);
 }
