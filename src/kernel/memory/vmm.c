@@ -47,7 +47,7 @@ uint64_t vmm_get_page(uint64_t P4, uint64_t addr)
     return -1;
 }
 
-int vmm_set_page(uint64_t P4, uint64_t addr, uint64_t page, uint16_t flags)
+int vmm_set_page(uint64_t P4, uint64_t addr, uint64_t page, uint16_t flags, int touch)
 {
   if(flags & PAGE_HUGE)
   {
@@ -55,7 +55,12 @@ int vmm_set_page(uint64_t P4, uint64_t addr, uint64_t page, uint16_t flags)
           && P4e(P4, addr).present
           && P3e(P4, addr).present
         ))
-      return -1;
+    {
+      if(touch)
+        touch_page(P4, addr, flags);
+      else
+        return -1;
+    }
     if(P2e(P4, addr).present && !P2e(P4,addr).huge)
       return -1;
     P2e(P4, addr).value = page | flags;
@@ -63,7 +68,12 @@ int vmm_set_page(uint64_t P4, uint64_t addr, uint64_t page, uint16_t flags)
   }
 
   if(!page_exists(P4, addr))
-    return -1;
+  {
+    if(touch)
+      touch_page(P4, addr, flags);
+    else
+      return -1;
+  }
 
   P1e(P4, addr).value = page | flags;
   return 0;
