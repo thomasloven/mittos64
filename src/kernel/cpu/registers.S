@@ -17,6 +17,10 @@ read_cr2:
 read_cr3:
   mov rax, cr3
   ret
+.global write_cr3
+write_cr3:
+  mov cr3, rdi
+  ret
 .global read_cr4
 read_cr4:
   mov rax, cr4

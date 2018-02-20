@@ -3,7 +3,13 @@
 
 #include <memory.h>
 #undef P2V
-#define P2V(p) (p)
+#define P2V(p) ((void *)(p))
+
+uint64_t kernel_P4;
+uint64_t pmm_alloc()
+{
+  return 0;
+}
 
 #include "vmm.c"
 

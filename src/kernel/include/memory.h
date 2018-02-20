@@ -39,6 +39,7 @@ void pmm_free(uint64_t page);
 uint64_t pmm_alloc();
 uint64_t pmm_calloc();
 
+uint64_t new_P4();
 uint64_t vmm_get_page(uint64_t P4, uint64_t addr);
 #define PAGE_EXIST(p) ((p) != (uint64_t)-1)
 int vmm_set_page(uint64_t P4, uint64_t addr, uint64_t page, uint16_t flags);

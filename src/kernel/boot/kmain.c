@@ -35,6 +35,8 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
 
   cpu_init();
 
+  uintptr_t P4 = new_P4();
+  write_cr3(P4);
 
   debug_ok("Boot \"Complete\"\n");
 

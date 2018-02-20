@@ -14,6 +14,13 @@
 #define P2E PT(P3E)[P2_OFFSET(addr)]
 #define P1E PT(P2E)[P1_OFFSET(addr)]
 
+uint64_t new_P4()
+{
+  uint64_t p4 = pmm_alloc();
+  memcpy(P2V(p4), (void *)kernel_P4, PAGE_SIZE);
+  return p4;
+}
+
 static int page_exists(uint64_t P4, uint64_t addr)
 {
   if(P4 && PRESENT(P4E) && PRESENT(P3E) && PRESENT(P2E))
