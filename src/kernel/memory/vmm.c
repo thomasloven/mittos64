@@ -1,21 +1,21 @@
 #include <memory.h>
 
 #define FLAGS_MASK (PAGE_SIZE-1)
-#define MASK_FLAGS(addr) ((uintptr_t)addr & ~FLAGS_MASK)
+#define MASK_FLAGS(addr) ((uint64_t)addr & ~FLAGS_MASK)
 
 union PTE {
   uint64_t value;
   struct {
-    uintptr_t present:1;
-    uintptr_t write:1;
-    uintptr_t user:1;
-    uintptr_t write_through:1;
-    uintptr_t nocache:1;
-    uintptr_t accessed:1;
-    uintptr_t dirty:1;
-    uintptr_t huge:1;
-    uintptr_t global:1;
-    uintptr_t flags:3;
+    uint64_t present:1;
+    uint64_t write:1;
+    uint64_t user:1;
+    uint64_t write_through:1;
+    uint64_t nocache:1;
+    uint64_t accessed:1;
+    uint64_t dirty:1;
+    uint64_t huge:1;
+    uint64_t global:1;
+    uint64_t flags:3;
   };
 };
 
@@ -25,7 +25,7 @@ union PTE {
 #define P2e(pt, addr) PT(P3e(pt, addr).value)[P2_OFFSET(addr)]
 #define P1e(pt, addr) PT(P2e(pt, addr).value)[P1_OFFSET(addr)]
 
-int page_exists(void *P4, uintptr_t addr)
+static int page_exists(uint64_t P4, uint64_t addr)
 {
   if(P4
       && P4e(P4, addr).present
@@ -36,7 +36,7 @@ int page_exists(void *P4, uintptr_t addr)
   return 0;
 }
 
-uintptr_t vmm_get_page(void *P4, uintptr_t addr)
+uint64_t vmm_get_page(uint64_t P4, uint64_t addr)
 {
   if(page_exists(P4, addr))
     if(P2e(P4, addr).huge)
@@ -47,7 +47,7 @@ uintptr_t vmm_get_page(void *P4, uintptr_t addr)
     return -1;
 }
 
-int vmm_set_page(void *P4, uintptr_t addr, uintptr_t page, uint16_t flags)
+int vmm_set_page(uint64_t P4, uint64_t addr, uint64_t page, uint16_t flags)
 {
   if(flags & PAGE_HUGE)
   {
@@ -69,7 +69,7 @@ int vmm_set_page(void *P4, uintptr_t addr, uintptr_t page, uint16_t flags)
   return 0;
 }
 
-int touch_page(void *P4, uintptr_t addr, uint16_t flags)
+int touch_page(uint64_t P4, uint64_t addr, uint16_t flags)
 {
   if(!P4) return -1;
 
@@ -96,7 +96,7 @@ int touch_page(void *P4, uintptr_t addr, uint16_t flags)
   return 0;
 }
 
-void free_page(void *P4, uintptr_t addr, int free)
+void free_page(uint64_t P4, uint64_t addr, int free)
 {
   if(!page_exists(P4, addr))
     return;

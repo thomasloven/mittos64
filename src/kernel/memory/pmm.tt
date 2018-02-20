@@ -15,19 +15,19 @@ struct {
 TEST(alloc_returns_freed_page)
 {
   pmm_free(V2P(&mem[0]));
-  uintptr_t a = pmm_alloc();
+  uint64_t a = pmm_alloc();
   ASSERT_EQ_PTR(a, V2P(&mem[0]));
 }
 TEST(alloc_returns_0_if_no_free_pages)
 {
-  uintptr_t a = pmm_alloc();
+  uint64_t a = pmm_alloc();
   ASSERT_EQ_PTR(a, 0);
 }
 TEST(alloc_zero_after_all_free_pages)
 {
   pmm_free(V2P(&mem[0]));
   pmm_alloc();
-  uintptr_t a = pmm_alloc();
+  uint64_t a = pmm_alloc();
   ASSERT_EQ_PTR(a, 0);
 }
 
@@ -35,7 +35,7 @@ TEST(alloc_two_pages___first_page_is_not_zero)
 {
   pmm_free(V2P(&mem[0]));
   pmm_free(V2P(&mem[1]));
-  uintptr_t a = pmm_alloc();
+  uint64_t a = pmm_alloc();
   pmm_alloc();
   ASSERT_NEQ_PTR(a, 0);
 }
@@ -44,14 +44,14 @@ TEST(alloc_two_pages___second_page_is_not_zero)
   pmm_free(V2P(&mem[0]));
   pmm_free(V2P(&mem[1]));
   pmm_alloc();
-  uintptr_t a = pmm_alloc();
+  uint64_t a = pmm_alloc();
   ASSERT_NEQ_PTR(a, 0);
 }
 TEST(alloc_two_pages___doesnt_return_same_page_twice)
 {
   pmm_free(V2P(&mem[0]));
   pmm_free(V2P(&mem[1]));
-  uintptr_t a = pmm_alloc();
-  uintptr_t b = pmm_alloc();
+  uint64_t a = pmm_alloc();
+  uint64_t b = pmm_alloc();
   ASSERT_NEQ_PTR(a, b);
 }

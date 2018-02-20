@@ -8,13 +8,14 @@
 #include "vmm.c"
 
 void *data;
-uintptr_t *p4, *p3, *p2, *p1;
+uint64_t *p4, *p3, *p2, *p1;
+uint64_t P4;
 
 #define ADDR1234 ((1UL<<39) + (2UL<<30) + (3UL<<21) + (4UL<<12))
 #define BUILD_PT(o4, o3, o2) \
-  p4[(o4)] = (uintptr_t)p3; p4[(o4)] |= PAGE_PRESENT; \
-  p3[(o3)] = (uintptr_t)p2; p3[(o3)] |= PAGE_PRESENT; \
-  p2[(o2)] = (uintptr_t)p1; p2[(o2)] |= PAGE_PRESENT;
+  p4[(o4)] = (uint64_t)p3; p4[(o4)] |= PAGE_PRESENT; \
+  p3[(o3)] = (uint64_t)p2; p3[(o3)] |= PAGE_PRESENT; \
+  p2[(o2)] = (uint64_t)p1; p2[(o2)] |= PAGE_PRESENT;
 
 BEFORE()
 {
@@ -23,6 +24,7 @@ BEFORE()
   p3 = &p4[512];
   p2 = &p4[1024];
   p1 = &p4[1536];
+  P4 = (uint64_t)p4;
 }
 AFTER()
 {
@@ -34,7 +36,7 @@ TEST(get_page_returns_correct_address)
   BUILD_PT(0,0,0);
   p1[0] = 0x1234567890ABC000 | PAGE_PRESENT;
 
-  uintptr_t ret = vmm_get_page(p4, 0);
+  uint64_t ret = vmm_get_page(P4, 0);
 
   ASSERT_EQ_PTR(ret, 0x1234567890ABC000 | PAGE_PRESENT);
 }
@@ -43,7 +45,7 @@ TEST(get_page_ignores_flags)
   BUILD_PT(0,0,0);
   p1[0] = 0x1234567890ABC000 | PAGE_PRESENT;
 
-  uintptr_t ret = vmm_get_page(p4, 0);
+  uint64_t ret = vmm_get_page(P4, 0);
 
   ASSERT_EQ_PTR(ret, 0x1234567890ABC000 | PAGE_PRESENT);
 }
@@ -52,27 +54,27 @@ TEST(get_page_works_for_different_address)
   BUILD_PT(1,2,3)
   p1[4] = 0x34567890ABCDE000 | PAGE_PRESENT;
 
-  uintptr_t ret = vmm_get_page(p4, ADDR1234);
+  uint64_t ret = vmm_get_page(P4, ADDR1234);
 
   ASSERT_EQ_PTR(ret, 0x34567890ABCDE000 | PAGE_PRESENT);
 }
 TEST(get_page_fails_if_PTE_not_present)
 {
   BUILD_PT(0,0,0);
-  p2[0] = (uintptr_t)p1;
+  p2[0] = (uint64_t)p1;
   p1[0] = 0x1234567890ABC000 | PAGE_PRESENT;
 
-  uintptr_t ret = vmm_get_page(p4, 0);
+  uint64_t ret = vmm_get_page(P4, 0);
 
   ASSERT_EQ_PTR(ret, -1);
 }
 TEST(get_page_gets_2mb_pages)
 {
-  p4[1] = (uintptr_t)p3; p4[1] |= PAGE_PRESENT;
-  p3[2] = (uintptr_t)p2; p3[2] |= PAGE_PRESENT;
+  p4[1] = (uint64_t)p3; p4[1] |= PAGE_PRESENT;
+  p3[2] = (uint64_t)p2; p3[2] |= PAGE_PRESENT;
   p2[3] = 0x1234567890A00000 | PAGE_HUGE | PAGE_PRESENT;
 
-  uintptr_t ret = vmm_get_page(p4, ADDR1234);
+  uint64_t ret = vmm_get_page(P4, ADDR1234);
   ASSERT_EQ_PTR(ret, 0x1234567890A00000 | PAGE_HUGE | PAGE_PRESENT);
 }
 
@@ -80,7 +82,7 @@ TEST(set_page_sets_page)
 {
   BUILD_PT(0,0,0);
 
-  vmm_set_page(p4, 0, 0x1234567890ABC000, PAGE_PRESENT);
+  vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT);
 
   ASSERT_EQ_PTR(p1[0], 0x1234567890ABC000 | PAGE_PRESENT);
 }
@@ -88,25 +90,25 @@ TEST(set_page_returns_success_if_working)
 {
   BUILD_PT(0,0,0);
 
-  int retval = vmm_set_page(p4, 0, 0x1234567890ABC000, PAGE_PRESENT);
+  int retval = vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT);
 
   ASSERT_EQ_INT(retval, 0);
 }
 TEST(set_page_fails_if_PT_missing)
 {
   BUILD_PT(0,0,0);
-  p3[0] = (uintptr_t)p2;
+  p3[0] = (uint64_t)p2;
 
-  int retval = vmm_set_page(p4, 0, 0x1234567890ABC000, PAGE_PRESENT);
+  int retval = vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT);
 
   ASSERT_NEQ_INT(retval, 0);
 }
 TEST(set_page_sets_2mb_pages)
 {
-  p4[1] = (uintptr_t)p3; p4[1] |= PAGE_PRESENT;
-  p3[2] = (uintptr_t)p2; p3[2] |= PAGE_PRESENT;
+  p4[1] = (uint64_t)p3; p4[1] |= PAGE_PRESENT;
+  p3[2] = (uint64_t)p2; p3[2] |= PAGE_PRESENT;
 
-  vmm_set_page(p4, (1UL<<39)+(2UL<<30)+(3UL<<21), 0x1234567890A00000, PAGE_HUGE | PAGE_PRESENT);
+  vmm_set_page(P4, (1UL<<39)+(2UL<<30)+(3UL<<21), 0x1234567890A00000, PAGE_HUGE | PAGE_PRESENT);
 
   ASSERT_EQ_PTR(p2[3], 0x1234567890A00000 | PAGE_HUGE | PAGE_PRESENT);
 }
@@ -114,52 +116,52 @@ TEST(set_page_does_not_overwrite_4kb_pages_with_2mb)
 {
   BUILD_PT(0,0,0);
 
-  int retval = vmm_set_page(p4, 0, 0, PAGE_HUGE | PAGE_PRESENT);
+  int retval = vmm_set_page(P4, 0, 0, PAGE_HUGE | PAGE_PRESENT);
 
   ASSERT_NEQ_INT(retval, 0);
 }
 
-uintptr_t pmm_calloc()
+uint64_t pmm_calloc()
 {
-  uintptr_t *pages[] = {p3, p2, p1};
+  uint64_t *pages[] = {p3, p2, p1};
   static int counter=0;
   if(counter >= 3) return 0;
-  return (uintptr_t)pages[counter++];
+  return (uint64_t)pages[counter++];
 }
 
 TEST(touch_page_adds_P3)
 {
-  touch_page(p4, ADDR1234, 0);
+  touch_page(P4, ADDR1234, 0);
 
-  ASSERT_EQ_PTR(p4[1], (uintptr_t)p3 | PAGE_PRESENT);
+  ASSERT_EQ_PTR(p4[1], (uint64_t)p3 | PAGE_PRESENT);
 }
 TEST(touch_page_adds_P2)
 {
-  touch_page(p4, ADDR1234, 0);
+  touch_page(P4, ADDR1234, 0);
 
-  ASSERT_EQ_PTR(p3[2], (uintptr_t)p2 | PAGE_PRESENT);
+  ASSERT_EQ_PTR(p3[2], (uint64_t)p2 | PAGE_PRESENT);
 }
 TEST(touch_page_adds_P1)
 {
-  touch_page(p4, ADDR1234, 0);
+  touch_page(P4, ADDR1234, 0);
 
-  ASSERT_EQ_PTR(p2[3], (uintptr_t)p1 | PAGE_PRESENT);
+  ASSERT_EQ_PTR(p2[3], (uint64_t)p1 | PAGE_PRESENT);
 }
 TEST(touch_page_sets_flags)
 {
-  touch_page(p4, 0, PAGE_WRITE);
+  touch_page(P4, 0, PAGE_WRITE);
 
-  ASSERT_EQ_PTR(p2[0], (uintptr_t)p1 | PAGE_WRITE | PAGE_PRESENT);
+  ASSERT_EQ_PTR(p2[0], (uint64_t)p1 | PAGE_WRITE | PAGE_PRESENT);
 }
 TEST(touch_page_fails_if_out_of_pages)
 {
   pmm_calloc();
-  int retval = touch_page(p4, 0, 0);
+  int retval = touch_page(P4, 0, 0);
   ASSERT_NEQ_INT(retval, 0);
 }
 TEST(touch_page_stops_at_P2_for_huge_pages)
 {
-  touch_page(p4, 0, PAGE_HUGE);
+  touch_page(P4, 0, PAGE_HUGE);
   ASSERT_EQ_PTR(p2[0], 0);
 }
 
@@ -168,7 +170,7 @@ TEST(free_page_unsets_page)
   BUILD_PT(1,2,3);
   p1[4] = PAGE_PRESENT;
 
-  free_page(p4, ADDR1234, 0);
+  free_page(P4, ADDR1234, 0);
 
   ASSERT_EQ_PTR(p1[4], 0);
 }
@@ -177,7 +179,7 @@ TEST(free_page_unsets_P2_entry_if_P1_is_empty)
   BUILD_PT(1,2,3);
   p1[4] = PAGE_PRESENT;
 
-  free_page(p4, ADDR1234, 1);
+  free_page(P4, ADDR1234, 1);
 
   ASSERT_EQ_PTR(p2[3], 0);
 }
@@ -186,7 +188,7 @@ TEST(free_page_does_not_unset_P2_entry_if_not_asked_to)
   BUILD_PT(1,2,3);
   p1[4] = PAGE_PRESENT;
 
-  free_page(p4, ADDR1234, 0);
+  free_page(P4, ADDR1234, 0);
 
   ASSERT_NEQ_PTR(p2[3], 0);
 }
@@ -196,7 +198,7 @@ TEST(free_page_does_not_unset_P2_entry_if_P1_is_not_empty)
   p1[4] = PAGE_PRESENT;
   p1[0] = PAGE_PRESENT;
 
-  free_page(p4, ADDR1234, 1);
+  free_page(P4, ADDR1234, 1);
 
   ASSERT_NEQ_PTR(p2[3], 0);
 }
@@ -207,13 +209,13 @@ TEST(free_page_does_not_stop_if_P2_pointed_page_is_not_empty)
   p1[4] = PAGE_PRESENT;
   p1[0] = PAGE_PRESENT;
 
-  free_page(p4, ADDR1234, 1);
+  free_page(P4, ADDR1234, 1);
 
   ASSERT_EQ_PTR(p2[3], 0);
 }
 
-uintptr_t freed[] = {0,0,0,0,0};
-void pmm_free(uintptr_t page)
+uint64_t freed[] = {0,0,0,0,0};
+void pmm_free(uint64_t page)
 {
   static int counter = 0;
   freed[counter++] = page;
@@ -223,7 +225,7 @@ TEST(free_page_returns_P1_to_PMM_if_empty)
   BUILD_PT(1,2,3);
   p1[4] = PAGE_PRESENT;
 
-  free_page(p4, ADDR1234, 1);
+  free_page(P4, ADDR1234, 1);
 
   ASSERT_EQ_PTR(freed[0], p1);
 }
