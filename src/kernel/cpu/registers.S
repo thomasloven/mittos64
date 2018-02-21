@@ -17,6 +17,8 @@ load_gdt:
   push rax
   retfq
 .load_gdt:
+  mov rax, 0x18
+  ltr ax
   ret
 
 .global read_cr0
