@@ -161,7 +161,7 @@ TEST(reads_mmap_tag)
   );
   multiboot_init(MAGIC, tags);
 
-  ASSERT_EQ_INT(kernel_boot_data.mmap_size, 1);
+  ASSERT_EQ_INT(kernel_boot_data.mmap_len, 1);
   free(tags);
 }
 void setup_memory_areas()
@@ -179,7 +179,7 @@ void setup_memory_areas()
 TEST(reads_multiple_mmap_tags)
 {
   setup_memory_areas();
-  ASSERT_EQ_INT(kernel_boot_data.mmap_size, 2);
+  ASSERT_EQ_INT(kernel_boot_data.mmap_len, 2);
 }
 TEST(returns_memory_area_start)
 {

@@ -50,7 +50,8 @@ int parse_multiboot2(struct taglist *tags)
         break;
       case MBOOT2_MMAP:
         mmap = kernel_boot_data.mmap = (void *)tag->data;
-        kernel_boot_data.mmap_size = (tag->size - 8)/mmap->entry_size;
+        kernel_boot_data.mmap_len = (tag->size - 8)/mmap->entry_size;
+        kernel_boot_data.mmap_size = (tag->size - 8);
         break;
       default:
         debug_warning("Unknown multiboot tag type:%d \n", tag->type);
@@ -76,7 +77,7 @@ int multiboot_init(uint64_t magic, void *mboot_info)
 
 int multiboot_get_memory_area(size_t count, uintptr_t *start, uintptr_t *end, uint32_t *type)
 {
-  if(count >= kernel_boot_data.mmap_size) return 1;
+  if(count >= kernel_boot_data.mmap_len) return 1;
 
   struct mmap *mmap = kernel_boot_data.mmap;
   struct mmap_entry *entry = mmap->entries;
@@ -85,5 +86,18 @@ int multiboot_get_memory_area(size_t count, uintptr_t *start, uintptr_t *end, ui
   *start = entry->base;
   *end = entry->base + entry->len;
   *type = entry->type;
+  return 0;
+}
+
+int multiboot_page_used(uintptr_t start)
+{
+#define overlap(st, len) ((uintptr_t)st < (start + PAGE_SIZE) && start <= ((uintptr_t)st + len))
+  if(
+      overlap(kernel_boot_data.bootloader, strlen(kernel_boot_data.bootloader)) ||
+      overlap(kernel_boot_data.commandline, strlen(kernel_boot_data.commandline)) ||
+      overlap(kernel_boot_data.mmap, kernel_boot_data.mmap_size) ||
+    0)
+    return 1;
+
   return 0;
 }

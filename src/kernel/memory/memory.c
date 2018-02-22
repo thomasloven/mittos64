@@ -17,6 +17,8 @@ void memory_init()
     {
       if(p >= V2P(&kernel_start) && p < V2P(&kernel_end))
         continue;
+      if(multiboot_page_used(p))
+        continue;
 
       uint64_t addr = (uint64_t)P2V(p);
       uint64_t page = vmm_get_page(kernel_P4, addr);
