@@ -1,12 +1,12 @@
 #include <cpu.h>
 #include <interrupts.h>
 
-uint64_t gdt[6];
-uint8_t tss[104];
-void gdt_init(uint64_t *, void *);
+uint64_t global_gdt[6];
+uint8_t global_tss[104];
+void gdt_init();
 
 void cpu_init()
 {
   interrupt_init();
-  gdt_init(gdt, tss);
+  gdt_init();
 }

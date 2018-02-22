@@ -62,7 +62,7 @@ void scheduler()
 
     _proc = new;
     write_cr3(new->P4);
-    set_tss_rsp0(tss, new + PAGE_SIZE);
+    interrupt_stack(new + PAGE_SIZE);
     switch_stack(&sched_proc->stack_ptr, &new->stack_ptr);
 
     ready(_proc);
