@@ -5,6 +5,7 @@
 switch_stack:
   push rbp
   mov rbp, rsp
+  push rdi
   push r15
   push r14
   push r13
@@ -21,5 +22,6 @@ switch_stack:
   pop r13
   pop r14
   pop r15
+  pop rdi
   leaveq
   ret

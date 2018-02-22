@@ -18,6 +18,7 @@
 
 #define PAGE_PRESENT      0x001
 #define PAGE_WRITE        0x002
+#define PAGE_USER         0x004
 #define PAGE_HUGE         0x080
 #define PAGE_GLOBAL       0x100
 

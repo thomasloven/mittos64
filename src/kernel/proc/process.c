@@ -11,8 +11,10 @@ struct swtch_stack
   uint64_t R13;
   uint64_t R14;
   uint64_t R15;
+  uint64_t isr_return_arg;
   uint64_t RBP2;
   uint64_t ret;
+  registers r;
 }__attribute__((packed));
 
 struct process *sched_proc = 0;
@@ -28,7 +30,15 @@ struct process *new_process(void (*function)(void))
 
   struct swtch_stack *stk = proc->stack_ptr;
   stk->RBP = (uint64_t)&stk->RBP2;
-  stk->ret = (uint64_t)function;
+
+  stk->ret = (uint64_t)isr_return;
+  stk->isr_return_arg = (uint64_t)&stk->r;
+
+  stk->r.rip = (uint64_t)function;
+  stk->r.cs = 0x10 | 3;
+  stk->r.ss = 0x18 | 3;
+  stk->r.rflags = 3<<12;
+  stk->r.rsp = 0x10FFF;
 
   return proc;
 }
@@ -52,6 +62,7 @@ void scheduler()
 
     _proc = new;
     write_cr3(new->P4);
+    set_tss_rsp0(tss, new + PAGE_SIZE);
     switch_stack(&sched_proc->stack_ptr, &new->stack_ptr);
 
     ready(_proc);
@@ -61,8 +72,15 @@ void scheduler()
 
 void start_scheduler()
 {
-  sched_proc = new_process(scheduler);
+  sched_proc = P2V(pmm_calloc());
   sched_proc->pid = (uint64_t)-1;
+  sched_proc->stack_ptr = incptr(sched_proc, PAGE_SIZE - sizeof(struct swtch_stack) + sizeof(registers));
+  sched_proc->P4 = kernel_P4;
+
+  struct swtch_stack *stk = sched_proc->stack_ptr;
+  stk->RBP = (uint64_t)&stk->RBP2;
+
+  stk->ret = (uint64_t)scheduler;
 
   uint64_t stack;
   switch_stack(&stack, &sched_proc->stack_ptr);

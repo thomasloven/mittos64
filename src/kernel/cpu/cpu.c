@@ -1,7 +1,7 @@
 #include <cpu.h>
 #include <interrupts.h>
 
-uint64_t gdt[5];
+uint64_t gdt[6];
 uint8_t tss[104];
 void gdt_init(uint64_t *, void *);
 

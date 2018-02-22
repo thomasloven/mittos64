@@ -2,6 +2,7 @@
 #include <queue.h>
 #include <scheduler.h>
 #include <stdint.h>
+#include <interrupts.h>
 
 struct process
 {

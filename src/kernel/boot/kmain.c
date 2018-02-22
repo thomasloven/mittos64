@@ -8,16 +8,9 @@
 #include <process.h>
 #include <scheduler.h>
 
-int *pid = (int *)0x20000;
 void thread_function()
 {
-  *pid = process()->pid;
-
-  while(1)
-  {
-    debug("Process %d\n", *pid);
-    yield();
-  }
+  while(1);
 }
 
 
@@ -35,16 +28,12 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
 
   cpu_init();
 
-  struct process *p1 = new_process(thread_function);
-  vmm_set_page(p1->P4, 0x20000, pmm_alloc(), PAGE_WRITE | PAGE_PRESENT);
-  struct process *p2 = new_process(thread_function);
-  vmm_set_page(p2->P4, 0x20000, pmm_alloc(), PAGE_WRITE | PAGE_PRESENT);
-  struct process *p3 = new_process(thread_function);
-  vmm_set_page(p3->P4, 0x20000, pmm_alloc(), PAGE_WRITE | PAGE_PRESENT);
+  struct process *p1 = new_process((void (*)(void))0x10000);
+  uint64_t page = pmm_alloc();
+  vmm_set_page(p1->P4, 0x10000, page, PAGE_WRITE | PAGE_PRESENT | PAGE_USER);
+  memcpy(P2V(page), (void *)(uintptr_t)thread_function, PAGE_SIZE);
 
   ready(p1);
-  ready(p2);
-  ready(p3);
 
   debug_ok("Boot \"Complete\"\n");
 

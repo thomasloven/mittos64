@@ -3,6 +3,8 @@
 
 void cpu_init();
 
+extern uint8_t tss[];
+void set_tss_rsp0(void *tss, void *rsp0);
 
 
 void load_idt(void *);
