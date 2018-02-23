@@ -7,6 +7,7 @@
 #include <interrupts.h>
 #include <process.h>
 #include <scheduler.h>
+#include <smp.h>
 
 void thread_function()
 {
@@ -29,6 +30,8 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
   memory_init();
 
   cpu_init();
+
+  acpi_init();
 
   struct process *p1 = new_process((void (*)(void))0x10000);
   procmm_brk(p1, (void *)0x10100);
