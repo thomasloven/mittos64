@@ -3,7 +3,7 @@
 #include <scheduler.h>
 #include <stdint.h>
 #include <interrupts.h>
-#include <stddef.h>
+#include <cpu.h>
 
 struct process
 {
@@ -16,8 +16,6 @@ struct process
   uint64_t stack;
   QUEUE_SPOT(runQ);
 };
-
-struct process *process();
 
 struct process *new_process(void (*function)(void));
 void yield();

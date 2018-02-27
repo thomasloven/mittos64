@@ -52,12 +52,12 @@ struct gdt BootGDT[] = {
 
 struct gdtp GDTp = {2*8-1, BootGDT};
 
-void gdt_init()
+void gdt_init(struct cpu *c)
 {
-  struct gdt *gdt = GDT();
+  struct gdt *gdt = (void *)c->gdt;
   memcpy(gdt, BootGDT, sizeof(BootGDT));
 
-  struct tss *tss = TSS();
+  struct tss *tss = (void *)c->tss;
   tss->io_mba = sizeof(struct tss);
 
   uint32_t tss_limit = sizeof(struct tss);
@@ -77,6 +77,6 @@ void gdt_init()
 
 void interrupt_stack(void *rsp0)
 {
-  struct tss *tss = TSS();
+  struct tss *tss = (void *)cpu->tss;
   tss->rsp0 = (uint64_t)rsp0;
 }

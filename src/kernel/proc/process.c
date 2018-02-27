@@ -17,11 +17,11 @@ struct swtch_stack
   registers r;
 }__attribute__((packed));
 
-struct process *sched_proc = 0;
-struct process *_proc = 0;
-
 void procmm_init(struct process *p);
 registers *proc_pagefault(registers *r);
+
+#define csched cpu->scheduler
+#define cproc cpu->proc
 
 uint64_t next_pid = 1;
 struct process *new_process(void (*function)(void))
@@ -51,14 +51,9 @@ struct process *new_process(void (*function)(void))
   return proc;
 }
 
-struct process *process()
-{
-  return _proc;
-}
-
 void yield()
 {
-  switch_stack(&_proc->stack_ptr, &sched_proc->stack_ptr);
+  switch_stack(&cproc->stack_ptr, &csched->stack_ptr);
 }
 
 void scheduler()
@@ -68,28 +63,28 @@ void scheduler()
     struct process *new = 0;
     while(!(new = scheduler_next()));
 
-    _proc = new;
+    cproc = new;
     write_cr3(new->P4);
     interrupt_stack(incptr(new, PAGE_SIZE));
-    switch_stack(&sched_proc->stack_ptr, &new->stack_ptr);
+    switch_stack(&csched->stack_ptr, &new->stack_ptr);
 
-    ready(_proc);
-    _proc = 0;
+    ready(cproc);
+    cproc = 0;
   }
 }
 
 void start_scheduler()
 {
-  sched_proc = P2V(pmm_calloc());
-  sched_proc->pid = (uint64_t)-1;
-  sched_proc->stack_ptr = incptr(sched_proc, PAGE_SIZE - sizeof(struct swtch_stack) + sizeof(registers));
-  sched_proc->P4 = kernel_P4;
+  struct process *sched = csched = P2V(pmm_calloc());
+  sched->pid = (uint64_t)-1;
+  sched->stack_ptr = incptr(sched, PAGE_SIZE - sizeof(struct swtch_stack) + sizeof(registers));
+  sched->P4 = kernel_P4;
 
-  struct swtch_stack *stk = sched_proc->stack_ptr;
+  struct swtch_stack *stk = sched->stack_ptr;
   stk->RBP = (uint64_t)&stk->RBP2;
 
   stk->ret = (uint64_t)scheduler;
 
   uint64_t stack;
-  switch_stack(&stack, &sched_proc->stack_ptr);
+  switch_stack(&stack, &sched->stack_ptr);
 }

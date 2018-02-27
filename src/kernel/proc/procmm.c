@@ -35,17 +35,17 @@ registers *proc_pagefault(registers *r)
   }
 
   uint64_t fault_addr = read_cr2();
-  uint64_t stack = PROCESS()->stack;
+  uint64_t stack = cpu->proc->stack;
   if(fault_addr + PAGE_SIZE >= stack)
   {
     // Page fault happened just below stack. Add another page to it.
     // Unless it's about to run into brk.
-    if(stack - PAGE_SIZE <= PROCESS()->brk)
-      PANIC("Stack overflow in process %d\n", PROCESS()->pid);
+    if(stack - PAGE_SIZE <= cpu->proc->brk)
+      PANIC("Stack overflow in process %d\n", cpu->proc->pid);
 
     stack -= PAGE_SIZE;
-    vmm_set_page(PROCESS()->P4, stack, pmm_alloc(), PAGE_USER | PAGE_WRITE | PAGE_PRESENT);
-    PROCESS()->stack = stack;
+    vmm_set_page(cpu->proc->P4, stack, pmm_alloc(), PAGE_USER | PAGE_WRITE | PAGE_PRESENT);
+    cpu->proc->stack = stack;
 
     return r;
   }

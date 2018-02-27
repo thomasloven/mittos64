@@ -1,12 +1,15 @@
 #include <cpu.h>
 #include <interrupts.h>
+#include <memory.h>
 
-uint64_t global_gdt[6];
-uint8_t global_tss[104];
-void gdt_init();
+void gdt_init(struct cpu *cpu);
+
+struct cpu *cpu;
 
 void cpu_init()
 {
+  cpu = P2V(pmm_calloc());
   interrupt_init();
-  gdt_init();
+  gdt_init(cpu);
 }
+
