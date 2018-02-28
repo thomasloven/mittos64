@@ -1,4 +1,5 @@
 #include <memory.h>
+#include <debug.h>
 
 #define FLAGS_MASK (PAGE_SIZE-1)
 #define MASK_FLAGS(addr) ((uint64_t)addr & ~FLAGS_MASK)
@@ -100,4 +101,49 @@ void vmm_clear_page(uint64_t P4, uint64_t addr, int free)
       return;
   pmm_free(MASK_FLAGS(P4E));
   P4E = 0;
+}
+
+#define min(a,b) (((a) < (b))?(a):(b))
+#define offset(p) ((uintptr_t)(p) % PAGE_SIZE)
+#define remaining(p) (PAGE_SIZE - offset(p))
+size_t memcpy_k2u(uint64_t P4, void *dst, void *src, size_t n)
+{
+  size_t copied = 0;
+  while(n)
+  {
+    size_t bytes = min(remaining(dst), n);
+    uintptr_t page = vmm_get_page(P4, (uintptr_t)dst);
+    if(!PAGE_EXIST(page))
+      return copied;
+
+    void *to = P2V(MASK_FLAGS(page) + offset(dst));
+    memcpy(to, src, bytes);
+
+    copied += bytes;
+    n -= bytes;
+    dst = incptr(dst, bytes);
+    src = incptr(src, bytes);
+  }
+  return copied;
+}
+
+size_t memcpy_u2k(void *dst, uint64_t P4, void *src, size_t n)
+{
+  size_t copied = 0;
+  while(n)
+  {
+    size_t bytes = min(remaining(src), n);
+    uintptr_t page = vmm_get_page(P4, (uintptr_t)src);
+    if(!PAGE_EXIST(page))
+      return copied;
+
+    void *from = P2V(MASK_FLAGS(page) + offset(src));
+    memcpy(dst, from, bytes);
+
+    copied += bytes;
+    n -= bytes;
+    dst = incptr(dst, bytes);
+    src = incptr(src, bytes);
+  }
+  return copied;
 }
