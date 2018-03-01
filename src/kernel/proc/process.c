@@ -20,13 +20,15 @@ struct swtch_stack
 struct process *sched_proc = 0;
 struct process *_proc = 0;
 
+void procmm_init(struct process *p);
+
 uint64_t next_pid = 1;
 struct process *new_process(void (*function)(void))
 {
   struct process *proc = P2V(pmm_calloc());
   proc->pid = next_pid++;
   proc->stack_ptr = incptr(proc, PAGE_SIZE - sizeof(struct swtch_stack));
-  proc->P4 = new_P4();
+  procmm_init(proc);
 
   struct swtch_stack *stk = proc->stack_ptr;
   stk->RBP = (uint64_t)&stk->RBP2;
@@ -38,7 +40,7 @@ struct process *new_process(void (*function)(void))
   stk->r.cs = 0x10 | 3;
   stk->r.ss = 0x18 | 3;
   stk->r.rflags = 3<<12;
-  stk->r.rsp = 0x10FFF;
+  stk->r.rsp = KERNEL_OFFSET;
 
   return proc;
 }
@@ -62,7 +64,7 @@ void scheduler()
 
     _proc = new;
     write_cr3(new->P4);
-    interrupt_stack(new + PAGE_SIZE);
+    interrupt_stack(incptr(new, PAGE_SIZE));
     switch_stack(&sched_proc->stack_ptr, &new->stack_ptr);
 
     ready(_proc);

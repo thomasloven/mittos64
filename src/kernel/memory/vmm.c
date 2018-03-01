@@ -106,7 +106,7 @@ void vmm_clear_page(uint64_t P4, uint64_t addr, int free)
 #define min(a,b) (((a) < (b))?(a):(b))
 #define offset(p) ((uintptr_t)(p) % PAGE_SIZE)
 #define remaining(p) (PAGE_SIZE - offset(p))
-size_t memcpy_k2u(uint64_t P4, void *dst, void *src, size_t n)
+size_t memcpy_to_p4(uint64_t P4, void *dst, void *src, size_t n)
 {
   size_t copied = 0;
   while(n)
@@ -127,7 +127,7 @@ size_t memcpy_k2u(uint64_t P4, void *dst, void *src, size_t n)
   return copied;
 }
 
-size_t memcpy_u2k(void *dst, uint64_t P4, void *src, size_t n)
+size_t memcpy_from_p4(void *dst, uint64_t P4, void *src, size_t n)
 {
   size_t copied = 0;
   while(n)

@@ -29,8 +29,8 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
   cpu_init();
 
   struct process *p1 = new_process((void (*)(void))0x10000);
-  vmm_set_page(p1->P4, 0x10000, pmm_calloc(), PAGE_WRITE | PAGE_PRESENT | PAGE_USER);
-  memcpy_k2u(p1->P4, (void *)0x10000, (void *)(uintptr_t)thread_function, 100);
+  procmm_brk(p1, (void *)0x10010);
+  memcpy_to_p4(p1->P4, (void *)0x10000, (void *)(uintptr_t)thread_function, 100);
 
   ready(p1);
 
