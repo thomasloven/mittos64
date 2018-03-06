@@ -11,6 +11,24 @@ target remote :1234
 set height 0
 set width 0
 
+# The PANIC() macro - defined in src/kernel/include/debug.h - creates
+# a label of the form panic_breakpoint_xxx, where xxx is a number.
+# Unfortunately, gdb can set breakpoints on FUNCTIONS based on regex, but
+# not on LABELS.
+# The following piece of python code runs objdump to extract all panic_breakpoint
+# labels, and set breakpoints for each.
+python
+import subprocess
+import os
+dump = subprocess.Popen(("objdump", "-t", os.environ['BUILDROOT'] + "sysroot/kernel"), stdout=subprocess.PIPE)
+lines = subprocess.check_output(('grep', 'panic_breakpoint'), stdin=dump.stdout)
+dump.wait()
+for line in lines.split('\n'):
+  name = line.split(' ')[-1]
+  if name:
+    gdb.execute('b ' + name, to_string=True)
+end
+
 define q
 monitor quit
 end

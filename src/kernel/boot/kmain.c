@@ -14,6 +14,8 @@ void kmain()
   debug_ok("This thing worked well!\n");
   debug_warning("Careful!\n");
   debug_error("Something went wrong!\n");
+
+  PANIC("Reached end of kernel main function\n");
   for(;;);
 }
 
