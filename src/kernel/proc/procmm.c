@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <debug.h>
 #include <memory.h>
+#include <cpu.h>
 
 void procmm_init(struct process *p)
 {
@@ -21,4 +22,19 @@ uint64_t procmm_brk(struct process *p, void *addr)
     p->brk += PAGE_SIZE;
   }
   return p->brk;
+}
+
+registers *proc_pagefault(registers *r)
+{
+  if(!(r->rflags & (3<<12)))
+  {
+    debug_error("Page fault in kernel!\n");
+    debug("Interrupt number: %d Error code: %d\n", r->int_no, r->err_code);
+    debug_print_registers(r);
+    PANIC("Page fault in kernel\n");
+  }
+
+  PANIC("Page fault in process\n");
+
+  return r;
 }

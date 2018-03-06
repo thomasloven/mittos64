@@ -21,10 +21,16 @@ struct process *sched_proc = 0;
 struct process *_proc = 0;
 
 void procmm_init(struct process *p);
+registers *proc_pagefault(registers *r);
 
 uint64_t next_pid = 1;
 struct process *new_process(void (*function)(void))
 {
+  if(next_pid == 1)
+  {
+    bind_interrupt(14, proc_pagefault);
+  }
+
   struct process *proc = P2V(pmm_calloc());
   proc->pid = next_pid++;
   proc->stack_ptr = incptr(proc, PAGE_SIZE - sizeof(struct swtch_stack));
