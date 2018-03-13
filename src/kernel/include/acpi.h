@@ -19,8 +19,9 @@ struct acpi_info
     uint32_t base;
   } ioapic[MAX_IOAPIC];
 
-  uint32_t int_map[255];
+  uint32_t int_map[256];
 };
 extern struct acpi_info acpi_info;
 
 void acpi_init();
+int get_cpu();

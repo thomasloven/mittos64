@@ -7,7 +7,7 @@
 #include <interrupts.h>
 #include <process.h>
 #include <scheduler.h>
-#include <smp.h>
+#include <acpi.h>
 
 void thread_function()
 {

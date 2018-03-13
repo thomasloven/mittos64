@@ -1,6 +1,8 @@
-#include <smp.h>
+#include <acpi.h>
 #include <memory.h>
 #include <debug.h>
+
+#define packed __attribute__((packed))
 
 struct rsdp
 {
@@ -13,7 +15,8 @@ struct rsdp
   uint64_t xsdt;
   uint8_t checksum2;
   uint8_t _[3];
-}__attribute__((packed));
+}packed;
+#define RSDP_SIGNATURE "RSD PTR "
 
 struct sdt
 {
@@ -27,14 +30,15 @@ struct sdt
   uint32_t creator;
   uint32_t creator_rev;
   uint8_t data[];
-}__attribute__((packed));
+}packed;
+#define MADT_SIGNATURE "APIC"
 
 struct madt
 {
   uint32_t lic_address;
   uint32_t flags;
   uint8_t data[];
-}__attribute__((packed));
+}packed;
 struct madt_entry
 {
   uint8_t type;
@@ -44,21 +48,21 @@ struct madt_entry
       uint8_t id;
       uint8_t apic;
       uint32_t flags;
-    }__attribute__((packed)) lapic;
+    }packed lapic;
     struct {
       uint8_t id;
       uint8_t _;
       uint32_t addr;
       uint32_t base;
-    }__attribute__((packed)) ioapic;
+    }packed ioapic;
     struct {
       uint8_t bus;
       uint8_t source;
       uint32_t target;
       uint16_t flags;
-    }__attribute__((packed)) interrupt;
+    }packed interrupt;
   };
-}__attribute__((packed));
+}packed;
 
 #define MADT_CPU 0
 #define MADT_IOAPIC 1
@@ -66,32 +70,29 @@ struct madt_entry
 
 struct acpi_info acpi_info = {0};
 
+static void *scan_rsdp(uint64_t start, uint64_t end)
+{
+  void *p = P2V(start);
+  while(p < P2V(end))
+  {
+    if(!memcmp(p, RSDP_SIGNATURE, 8))
+      return p;
+    p = incptr(p, 16);
+  }
+  return 0;
+}
+
 static struct rsdp *find_rsdp()
 {
-  uintptr_t ebda_start = *(uint16_t *)P2V(0x40e);
-  uintptr_t ebda_end = ebda_start + 1024;
+  // Scan the Extended BIOS Data Area
+  uint16_t *ebda_ptr = P2V(0x40e);
+  uint64_t ebda = *ebda_ptr << 4;
+  void *p = scan_rsdp(ebda, ebda+1024);
+  if(p) return p;
 
-  void *p = P2V(ebda_start);
-  while(p < P2V(ebda_end))
-  {
-    if(!memcmp(p, "RSD PTR ", 8))
-    {
-      debug_info("RSDP found at:%x\n", p);
-      return p;
-    }
-    p = incptr(p, 16);
-  }
-
-  p = P2V(0xE0000);
-  while(p < P2V(0xFFFFF))
-  {
-    if(!memcmp(p, "RSD PTR ", 8))
-    {
-      debug_info("RSDP found at:%x\n", p);
-      return p;
-    }
-    p = incptr(p, 16);
-  }
+  // Scan 0xE0000 - 0xFFFFF
+  p = scan_rsdp(0xE0000, 0xFFFFF);
+  if(p) return p;
 
   return 0;
 }
@@ -106,20 +107,25 @@ static void parse_madt(struct madt *madt, uint32_t len)
     int i;
     switch(e->type)
     {
-      case MADT_CPU:
+      case MADT_CPU: // APIC descriptor (corresponds to unique cpu core)
+        // Check if cpu is enabled
+        if(!(e->lapic.id & 1)) break;
+        // Add to list
         i = acpi_info.num_cpus;
         acpi_info.cpu[i].id = e->lapic.id;
         acpi_info.cpu[i].apic = e->lapic.apic;
         acpi_info.num_cpus++;
         break;
-      case MADT_IOAPIC:
+
+      case MADT_IOAPIC: // IOAPIC descriptor
         i = acpi_info.num_ioapic;
         acpi_info.ioapic[i].id = e->ioapic.id;
         acpi_info.ioapic[i].addr = e->ioapic.addr;
         acpi_info.ioapic[i].base = e->ioapic.base;
         acpi_info.num_ioapic++;
         break;
-      case MADT_INT:
+
+      case MADT_INT: // Interrupt remap
         acpi_info.int_map[e->interrupt.source] = e->interrupt.target;
         break;
     }
@@ -136,10 +142,12 @@ static void parse_sdt(struct sdt *sdt, uint8_t revision)
   for(int i = 0; i < entries; i++)
   {
     struct sdt *table = P2V(revision ? p64[i] : p32[i]);
+
     debug_info("Found table: ");
     debug_putsn((char *)table->signature, 4);
     debug_printf("\n");
-    if(!memcmp(table->signature, "APIC", 4))
+
+    if(!memcmp(table->signature, MADT_SIGNATURE, 4))
       parse_madt((void *)table->data, table->len);
   }
 }
