@@ -77,6 +77,6 @@ void gdt_init(struct cpu *c)
 
 void interrupt_stack(void *rsp0)
 {
-  struct tss *tss = (void *)cpu->tss;
+  struct tss __seg_gs *tss = (void __seg_gs *)(cpu->tss);
   tss->rsp0 = (uint64_t)rsp0;
 }

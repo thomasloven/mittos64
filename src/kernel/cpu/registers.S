@@ -41,3 +41,20 @@ write_cr3:
 read_cr4:
   mov rax, cr4
   ret
+
+.global read_msr
+read_msr:
+  mov rcx, rdi
+  rdmsr
+  shl rdx, 32
+  add rax, rdx
+  ret
+
+.global write_msr
+write_msr:
+  mov rcx, rdi
+  mov rax, rsi
+  mov rdx, rsi
+  shr rdx, 32
+  wrmsr
+  ret

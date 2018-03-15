@@ -20,12 +20,26 @@ isr_common:
   push rcx
   push rbx
   push rax
+
+  mov rax, [rsp + 152]
+  and rax, (3<<12)
+  jz .kernel_interrupt
+  swapgs
+
+.kernel_interrupt:
   mov rdi, rsp
   call int_handler
 
   mov rdi, rax
 isr_return:
   mov rsp, rdi
+
+  mov rax, [rsp + 152]
+  and rax, (3<<12)
+  jz .kernel_return
+  swapgs
+
+.kernel_return:
   pop rax
   pop rbx
   pop rcx

@@ -4,13 +4,14 @@
 
 struct cpu
 {
+  void *cpu;
   uint64_t gdt[6];
   uint8_t tss[104];
   struct process *proc;
   struct process *scheduler;
 };
 
-extern struct cpu *cpu;
+extern struct cpu __seg_gs *cpu;
 
 void cpu_init();
 
@@ -24,3 +25,6 @@ uint64_t read_cr2();
 uint64_t read_cr3();
 void write_cr3(uint64_t);
 uint64_t read_cr4();
+
+void write_msr(uint64_t reg, uint64_t value);
+uint64_t read_msr(uint64_t reg);
