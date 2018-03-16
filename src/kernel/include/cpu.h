@@ -26,5 +26,8 @@ uint64_t read_cr3();
 void write_cr3(uint64_t);
 uint64_t read_cr4();
 
+// Model Specific Registers
+// Functions defined in cpu/registers.S
 void write_msr(uint64_t reg, uint64_t value);
 uint64_t read_msr(uint64_t reg);
+#define KERNEL_GS_BASE 0xC0000102

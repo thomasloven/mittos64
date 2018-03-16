@@ -49,7 +49,6 @@ read_msr:
   shl rdx, 32
   add rax, rdx
   ret
-
 .global write_msr
 write_msr:
   mov rcx, rdi

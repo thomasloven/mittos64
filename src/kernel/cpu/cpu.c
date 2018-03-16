@@ -9,9 +9,10 @@ struct cpu __seg_gs *cpu = 0;
 
 void cpu_init()
 {
+  // Set up cpu struct
   struct cpu *c = P2V(pmm_calloc());
   c->cpu = c;
-  write_msr(0xc0000102, (uint64_t)c);
+  write_msr(KERNEL_GS_BASE, (uint64_t)c);
   asm("swapgs");
 
   interrupt_init();
