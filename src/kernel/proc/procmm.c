@@ -50,6 +50,14 @@ registers *proc_pagefault(registers *r)
     return r;
   }
 
+  // Very uggly and very temporary way of signaling the kernel from a user mode process.
+  // TODO: REMOVE THIS CRAP!
+  if(read_cr2() == 0xBADC0FFEE)
+  {
+    debug("Bad signal from process %d\n", cpu->proc->pid);
+    yield();
+    return r;
+  }
   PANIC("Page fault in process\n");
   return r;
 }

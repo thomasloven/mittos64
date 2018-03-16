@@ -10,7 +10,9 @@
 
 void thread_function()
 {
-  while(1);
+  char *p = 0xBADC0FFEE;
+  while(1)
+    p[0] = 1;
 }
 
 
@@ -29,10 +31,14 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
   cpu_init();
 
   struct process *p1 = new_process((void (*)(void))0x10000);
-  procmm_brk(p1, (void *)0x10010);
+  procmm_brk(p1, (void *)0x10100);
   memcpy_to_p4(p1->P4, (void *)0x10000, (void *)(uintptr_t)thread_function, 100);
-
   ready(p1);
+
+  struct process *p2 = new_process((void (*)(void))0x10000);
+  procmm_brk(p2, (void *)0x10100);
+  memcpy_to_p4(p2->P4, (void *)0x10000, (void *)(uintptr_t)thread_function, 100);
+  ready(p2);
 
   debug_ok("Boot \"Complete\"\n");
 
