@@ -3,34 +3,20 @@
 #define FLAGS_MASK (PAGE_SIZE-1)
 #define MASK_FLAGS(addr) ((uint64_t)addr & ~FLAGS_MASK)
 
-union PTE {
-  uint64_t value;
-  struct {
-    uint64_t present:1;
-    uint64_t write:1;
-    uint64_t user:1;
-    uint64_t write_through:1;
-    uint64_t nocache:1;
-    uint64_t accessed:1;
-    uint64_t dirty:1;
-    uint64_t huge:1;
-    uint64_t global:1;
-    uint64_t flags:3;
-  };
-};
+#define PRESENT(p) (p & PAGE_PRESENT)
 
-#define PT(ptr) ((union PTE *)P2V(MASK_FLAGS(ptr)))
+#define PT(ptr) ((uint64_t *)P2V(MASK_FLAGS(ptr)))
 // Get the entry correspoding to address addr in page dir P4
 // for P4 table (P4E), P3 table (P3E) and so on.
 // Note: Those macros requires variables to be named
 #define P4E (PT(P4)[P4_OFFSET(addr)])
-#define P3E PT(P4E.value)[P3_OFFSET(addr)]
-#define P2E PT(P3E.value)[P2_OFFSET(addr)]
-#define P1E PT(P2E.value)[P1_OFFSET(addr)]
+#define P3E PT(P4E)[P3_OFFSET(addr)]
+#define P2E PT(P3E)[P2_OFFSET(addr)]
+#define P1E PT(P2E)[P1_OFFSET(addr)]
 
 static int page_exists(uint64_t P4, uint64_t addr)
 {
-  if(P4 && P4E.present && P3E.present && P2E.present)
+  if(P4 && PRESENT(P4E) && PRESENT(P3E) && PRESENT(P2E))
     return 1;
   return 0;
 }
@@ -39,7 +25,7 @@ uint64_t vmm_get_page(uint64_t P4, uint64_t addr)
 {
   if(page_exists(P4, addr))
   {
-    return P1E.value;
+    return P1E;
   }
   return -1;
 }
@@ -53,7 +39,7 @@ int vmm_set_page(uint64_t P4, uint64_t addr, uint64_t page, uint16_t flags, int 
     touch_page(P4, addr, flags);
   }
 
-  P1E.value = page | flags;
+  P1E = page | flags;
   return 0;
 }
 
@@ -61,17 +47,17 @@ int touch_page(uint64_t P4, uint64_t addr, uint16_t flags)
 {
   if(!P4) return -1;
 
-  if((!P4E.present) && (!(P4E.value = pmm_calloc())))
+  if((!PRESENT(P4E)) && (!(P4E = pmm_calloc())))
     return -1;
-  P4E.value |= flags | PAGE_PRESENT;
+  P4E |= flags | PAGE_PRESENT;
 
-  if((!P3E.present) && (!(P3E.value = pmm_calloc())))
+  if((!PRESENT(P3E)) && (!(P3E = pmm_calloc())))
     return -1;
-  P3E.value |= flags | PAGE_PRESENT;
+  P3E |= flags | PAGE_PRESENT;
 
-  if((!P2E.present) && (!(P2E.value = pmm_calloc())))
+  if((!PRESENT(P2E)) && (!(P2E = pmm_calloc())))
     return -1;
-  P2E.value |= flags | PAGE_PRESENT;
+  P2E |= flags | PAGE_PRESENT;
 
   return 0;
 }
@@ -81,31 +67,31 @@ void free_page(uint64_t P4, uint64_t addr, int free)
   if(!page_exists(P4, addr))
     return;
 
-  union PTE *pt;
+  uint64_t *pt;
 
-  P1E.value = 0;
+  P1E = 0;
 
   if(!free)
     return;
 
-  pt = PT(P2E.value);
+  pt = PT(P2E);
   for(int i = 0; i < ENTRIES_PER_PT; i++)
-    if(pt[i].value)
+    if(pt[i])
       return;
-  pmm_free(MASK_FLAGS(P2E.value));
-  P2E.value = 0;
+  pmm_free(MASK_FLAGS(P2E));
+  P2E = 0;
 
-  pt = PT(P3E.value);
+  pt = PT(P3E);
   for(int i = 0; i < ENTRIES_PER_PT; i++)
-    if(pt[i].value)
+    if(pt[i])
       return;
-  pmm_free(MASK_FLAGS(P3E.value));
-  P3E.value = 0;
+  pmm_free(MASK_FLAGS(P3E));
+  P3E = 0;
 
-  pt = PT(P4E.value);
+  pt = PT(P4E);
   for(int i = 0; i < ENTRIES_PER_PT; i++)
-    if(pt[i].value)
+    if(pt[i])
       return;
-  pmm_free(MASK_FLAGS(P4E.value));
-  P4E.value = 0;
+  pmm_free(MASK_FLAGS(P4E));
+  P4E = 0;
 }
