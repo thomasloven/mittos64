@@ -39,8 +39,6 @@ uint64_t vmm_get_page(uint64_t P4, uint64_t addr)
 {
   if(page_exists(P4, addr))
   {
-    if(P2E.huge)
-      return P2E.value;
     return P1E.value;
   }
   return -1;
@@ -48,22 +46,6 @@ uint64_t vmm_get_page(uint64_t P4, uint64_t addr)
 
 int vmm_set_page(uint64_t P4, uint64_t addr, uint64_t page, uint16_t flags, int touch)
 {
-  if(flags & PAGE_HUGE)
-  {
-    if(!(P4 && P4E.present && P3E.present))
-    {
-      if(!touch)
-        return -1;
-      touch_page(P4, addr, flags);
-    }
-
-    // Don't overwrite a non-huge page with a huge one
-    if(P2E.present && !P2E.huge)
-      return -1;
-    P2E.value = page | flags;
-    return 0;
-  }
-
   if(!page_exists(P4, addr))
   {
     if(!touch)
@@ -79,9 +61,6 @@ int touch_page(uint64_t P4, uint64_t addr, uint16_t flags)
 {
   if(!P4) return -1;
 
-  int huge=(flags & PAGE_HUGE)?1:0;
-  flags ^= PAGE_HUGE*huge;
-
   if((!P4E.present) && (!(P4E.value = pmm_calloc())))
     return -1;
   P4E.value |= flags | PAGE_PRESENT;
@@ -89,8 +68,6 @@ int touch_page(uint64_t P4, uint64_t addr, uint16_t flags)
   if((!P3E.present) && (!(P3E.value = pmm_calloc())))
     return -1;
   P3E.value |= flags | PAGE_PRESENT;
-
-  if(huge) return 0;
 
   if((!P2E.present) && (!(P2E.value = pmm_calloc())))
     return -1;
@@ -106,25 +83,17 @@ void free_page(uint64_t P4, uint64_t addr, int free)
 
   union PTE *pt;
 
-  if(P2E.huge)
-  {
-    P2E.value = 0;
+  P1E.value = 0;
 
-    if(!free)
+  if(!free)
+    return;
+
+  pt = PT(P2E.value);
+  for(int i = 0; i < ENTRIES_PER_PT; i++)
+    if(pt[i].value)
       return;
-  } else {
-    P1E.value = 0;
-
-    if(!free)
-      return;
-
-    pt = PT(P2E.value);
-    for(int i = 0; i < ENTRIES_PER_PT; i++)
-      if(pt[i].value)
-        return;
-    pmm_free(MASK_FLAGS(P2E.value));
-    P2E.value = 0;
-  }
+  pmm_free(MASK_FLAGS(P2E.value));
+  P2E.value = 0;
 
   pt = PT(P3E.value);
   for(int i = 0; i < ENTRIES_PER_PT; i++)

@@ -68,15 +68,6 @@ TEST(get_page_fails_if_PTE_not_present)
 
   ASSERT_EQ_PTR(ret, -1);
 }
-TEST(get_page_gets_2mb_pages)
-{
-  p4[1] = (uint64_t)p3; p4[1] |= PAGE_PRESENT;
-  p3[2] = (uint64_t)p2; p3[2] |= PAGE_PRESENT;
-  p2[3] = 0x1234567890A00000 | PAGE_HUGE | PAGE_PRESENT;
-
-  uint64_t ret = vmm_get_page(P4, ADDR1234);
-  ASSERT_EQ_PTR(ret, 0x1234567890A00000 | PAGE_HUGE | PAGE_PRESENT);
-}
 
 TEST(set_page_sets_page)
 {
@@ -121,23 +112,6 @@ TEST(set_page_makes_P3_if_PT_missing_but_touch_flag_is_set)
 
   ASSERT_EQ_INT(p3[0] & PAGE_PRESENT, PAGE_PRESENT);
 }
-TEST(set_page_sets_2mb_pages)
-{
-  p4[1] = (uint64_t)p3; p4[1] |= PAGE_PRESENT;
-  p3[2] = (uint64_t)p2; p3[2] |= PAGE_PRESENT;
-
-  vmm_set_page(P4, (1UL<<39)+(2UL<<30)+(3UL<<21), 0x1234567890A00000, PAGE_HUGE | PAGE_PRESENT, 0);
-
-  ASSERT_EQ_PTR(p2[3], 0x1234567890A00000 | PAGE_HUGE | PAGE_PRESENT);
-}
-TEST(set_page_does_not_overwrite_4kb_pages_with_2mb)
-{
-  BUILD_PT(0,0,0);
-
-  int retval = vmm_set_page(P4, 0, 0, PAGE_HUGE | PAGE_PRESENT, 0);
-
-  ASSERT_NEQ_INT(retval, 0);
-}
 
 uint64_t pmm_calloc()
 {
@@ -177,11 +151,6 @@ TEST(touch_page_fails_if_out_of_pages)
   int retval = touch_page(P4, 0, 0);
   ASSERT_NEQ_INT(retval, 0);
 }
-TEST(touch_page_stops_at_P2_for_huge_pages)
-{
-  touch_page(P4, 0, PAGE_HUGE);
-  ASSERT_EQ_PTR(p2[0], 0);
-}
 
 TEST(free_page_unsets_page)
 {
@@ -219,17 +188,6 @@ TEST(free_page_does_not_unset_P2_entry_if_P1_is_not_empty)
   free_page(P4, ADDR1234, 1);
 
   ASSERT_NEQ_PTR(p2[3], 0);
-}
-TEST(free_page_does_not_stop_if_P2_pointed_page_is_not_empty)
-{
-  BUILD_PT(1,2,3);
-  p2[3] |= PAGE_HUGE;
-  p1[4] = PAGE_PRESENT;
-  p1[0] = PAGE_PRESENT;
-
-  free_page(P4, ADDR1234, 1);
-
-  ASSERT_EQ_PTR(p2[3], 0);
 }
 
 uint64_t freed[] = {0,0,0,0,0};

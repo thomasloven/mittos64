@@ -24,7 +24,7 @@ void memory_init()
       uint64_t page = vmm_get_page(kernel_P4, addr);
       if(!PAGE_EXIST(page) || !(page & PAGE_PRESENT))
       {
-        uint16_t flags = PAGE_GLOBAL | PAGE_HUGE | PAGE_WRITE;
+        uint16_t flags = PAGE_GLOBAL | PAGE_WRITE;
         vmm_set_page(kernel_P4, addr, p, flags | PAGE_PRESENT, 1);
       }
 
