@@ -41,9 +41,8 @@ uint64_t pmm_calloc();
 
 uint64_t vmm_get_page(uint64_t P4, uint64_t addr);
 #define PAGE_EXIST(p) ((p) != (uint64_t)-1)
-int vmm_set_page(uint64_t P4, uint64_t addr, uint64_t page, uint16_t flags, int touch);
-int touch_page(uint64_t P4, uint64_t addr, uint16_t flags);
-void free_page(uint64_t P4, uint64_t addr, int free);
+int vmm_set_page(uint64_t P4, uint64_t addr, uint64_t page, uint16_t flags);
+void vmm_clear_page(uint64_t P4, uint64_t addr, int free);
 
 extern union PTE BootP4;
 extern int kernel_start, kernel_end;

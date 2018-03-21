@@ -73,7 +73,7 @@ TEST(set_page_sets_page)
 {
   BUILD_PT(0,0,0);
 
-  vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT, 0);
+  vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT);
 
   ASSERT_EQ_PTR(p1[0], 0x1234567890ABC000 | PAGE_PRESENT);
 }
@@ -81,25 +81,16 @@ TEST(set_page_returns_success_if_working)
 {
   BUILD_PT(0,0,0);
 
-  int retval = vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT, 0);
+  int retval = vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT);
 
   ASSERT_EQ_INT(retval, 0);
-}
-TEST(set_page_fails_if_PT_missing)
-{
-  BUILD_PT(0,0,0);
-  p3[0] = (uint64_t)p2;
-
-  int retval = vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT, 0);
-
-  ASSERT_NEQ_INT(retval, 0);
 }
 TEST(set_page_does_not_fail_if_PT_missing_but_touch_flag_is_set)
 {
   BUILD_PT(0,0,0);
   p3[0] = (uint64_t)p2;
 
-  int retval = vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT, 1);
+  int retval = vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT);
 
   ASSERT_EQ_INT(retval, 0);
 }
@@ -108,7 +99,7 @@ TEST(set_page_makes_P3_if_PT_missing_but_touch_flag_is_set)
   BUILD_PT(0,0,0);
   p3[0] = (uint64_t)p2;
 
-  vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT, 1);
+  vmm_set_page(P4, 0, 0x1234567890ABC000, PAGE_PRESENT);
 
   ASSERT_EQ_INT(p3[0] & PAGE_PRESENT, PAGE_PRESENT);
 }
@@ -121,71 +112,71 @@ uint64_t pmm_calloc()
   return (uint64_t)pages[counter++];
 }
 
-TEST(touch_page_adds_P3)
+TEST(touching_page_adds_P3)
 {
-  touch_page(P4, ADDR1234, 0);
+  vmm_set_page(P4, ADDR1234, 0, 0);
 
   ASSERT_EQ_PTR(p4[1], (uint64_t)p3 | PAGE_PRESENT);
 }
-TEST(touch_page_adds_P2)
+TEST(touching_page_adds_P2)
 {
-  touch_page(P4, ADDR1234, 0);
+  vmm_set_page(P4, ADDR1234, 0, 0);
 
   ASSERT_EQ_PTR(p3[2], (uint64_t)p2 | PAGE_PRESENT);
 }
-TEST(touch_page_adds_P1)
+TEST(touching_page_adds_P1)
 {
-  touch_page(P4, ADDR1234, 0);
+  vmm_set_page(P4, ADDR1234, 0, 0);
 
   ASSERT_EQ_PTR(p2[3], (uint64_t)p1 | PAGE_PRESENT);
 }
-TEST(touch_page_sets_flags)
+TEST(touching_page_sets_flags)
 {
-  touch_page(P4, 0, PAGE_WRITE);
+  vmm_set_page(P4, 0, 0, PAGE_WRITE);
 
   ASSERT_EQ_PTR(p2[0], (uint64_t)p1 | PAGE_WRITE | PAGE_PRESENT);
 }
-TEST(touch_page_fails_if_out_of_pages)
+TEST(touching_page_fails_if_out_of_pages)
 {
   pmm_calloc();
-  int retval = touch_page(P4, 0, 0);
+  int retval = vmm_set_page(P4, ADDR1234, 0, 0);
   ASSERT_NEQ_INT(retval, 0);
 }
 
-TEST(free_page_unsets_page)
+TEST(clear_page_unsets_page)
 {
   BUILD_PT(1,2,3);
   p1[4] = PAGE_PRESENT;
 
-  free_page(P4, ADDR1234, 0);
+  vmm_clear_page(P4, ADDR1234, 0);
 
   ASSERT_EQ_PTR(p1[4], 0);
 }
-TEST(free_page_unsets_P2_entry_if_P1_is_empty)
+TEST(clear_page_unsets_P2_entry_if_P1_is_empty)
 {
   BUILD_PT(1,2,3);
   p1[4] = PAGE_PRESENT;
 
-  free_page(P4, ADDR1234, 1);
+  vmm_clear_page(P4, ADDR1234, 1);
 
   ASSERT_EQ_PTR(p2[3], 0);
 }
-TEST(free_page_does_not_unset_P2_entry_if_not_asked_to)
+TEST(clear_page_does_not_unset_P2_entry_if_not_asked_to)
 {
   BUILD_PT(1,2,3);
   p1[4] = PAGE_PRESENT;
 
-  free_page(P4, ADDR1234, 0);
+  vmm_clear_page(P4, ADDR1234, 0);
 
   ASSERT_NEQ_PTR(p2[3], 0);
 }
-TEST(free_page_does_not_unset_P2_entry_if_P1_is_not_empty)
+TEST(clear_page_does_not_unset_P2_entry_if_P1_is_not_empty)
 {
   BUILD_PT(1,2,3);
   p1[4] = PAGE_PRESENT;
   p1[0] = PAGE_PRESENT;
 
-  free_page(P4, ADDR1234, 1);
+  vmm_clear_page(P4, ADDR1234, 1);
 
   ASSERT_NEQ_PTR(p2[3], 0);
 }
@@ -196,12 +187,12 @@ void pmm_free(uint64_t page)
   static int counter = 0;
   freed[counter++] = page;
 }
-TEST(free_page_returns_P1_to_PMM_if_empty)
+TEST(clear_page_returns_P1_to_PMM_if_empty)
 {
   BUILD_PT(1,2,3);
   p1[4] = PAGE_PRESENT;
 
-  free_page(P4, ADDR1234, 1);
+  vmm_clear_page(P4, ADDR1234, 1);
 
   ASSERT_EQ_PTR(freed[0], p1);
 }

@@ -25,7 +25,7 @@ void memory_init()
       if(!PAGE_EXIST(page) || !(page & PAGE_PRESENT))
       {
         uint16_t flags = PAGE_GLOBAL | PAGE_WRITE;
-        vmm_set_page(kernel_P4, addr, p, flags | PAGE_PRESENT, 1);
+        vmm_set_page(kernel_P4, addr, p, flags | PAGE_PRESENT);
       }
 
       if(type == MMAP_FREE)
