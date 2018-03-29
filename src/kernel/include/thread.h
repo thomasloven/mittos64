@@ -5,15 +5,17 @@
 
 struct thread
 {
-  uintptr_t stack_ptr;
   uint64_t tid;
+  void *stack_ptr;
   uint64_t state;
   QUEUE_SPOT(runQ);
+  uint8_t stack[];
 };
 
+struct thread *thread();
 
 struct thread *new_thread(void (*function)(void));
 void yield();
-struct thread *current_thread();
+void start_scheduler();
 
 void switch_stack(void *old_ptr, void *new_ptr);

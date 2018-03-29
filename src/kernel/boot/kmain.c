@@ -10,7 +10,7 @@
 
 void thread_function()
 {
-  int thread_id = current_thread()->tid;
+  int thread_id = thread()->tid;
 
   while(1)
   {
@@ -40,7 +40,8 @@ void kmain(uint64_t multiboot_magic, void *multiboot_data)
   ready(new_thread(thread_function));
   ready(new_thread(thread_function));
   ready(new_thread(thread_function));
-  yield();
+
+  start_scheduler();
 
   PANIC("Reached end of kernel main function\n");
   for(;;);
