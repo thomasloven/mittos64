@@ -1,6 +1,18 @@
-#MITTOS64
+# MITTOS64
 
-##Building
+This project is my attempt at a modern kernel.
+
+Differences from my earlier kernels include
+- 64 bit
+- symmetric multiprocessing
+- docker-based build chain
+- unit tests
+
+I meant to write very extensive documentation of the development process, but with two kids I have realized that will probably never happen, so now I'm releasing as is.
+
+Also take a look at [mittos64-old](https://github.com/thomasloven/mittos64-old/) which is a previous version of this that got a bit further (processes, c-library (JIT-patching of musl), ATA).
+
+## Building
 This project is set up to be built inside a Docker container.
 
 The container can be built by running the `d` script in the projects root directory - provided Docker is installed on your computer.
